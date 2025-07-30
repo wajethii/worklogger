@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiredWise Client Logger</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F16411',
+                        secondary: '#F6940E',
+                        accent: '#2D3748',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8f9fa;
+        }
+        .signature-canvas { touch-action: none; }
+        .log-entry { transition: all 0.3s ease; }
+        .log-entry:hover { transform: translateY(-3px); }
+        .wiredwise-logo {
+            background: linear-gradient(135deg, #F16411 0%, #F6940E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .technician-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(241, 100, 17, 0.1);
+            color: #F16411;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.875rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .hierarchy-1 { font-size: 1.25rem; font-weight: 600; color: #2D3748; }
+        .hierarchy-2 { font-size: 1.1rem; font-weight: 500; color: #4A5568; }
+        .hierarchy-3 { font-size: 1rem; font-weight: 400; color: #4A5568; }
+        .mobile-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 50;
+        }
+        @media (min-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="logApp()">
+    <!-- Mobile Menu -->
+    <div class="mobile-menu md:hidden">
+        <div class="flex justify-around py-3">
+            <button @click="showForm = true" class="flex flex-col items-center text-primary">
+                <i class="fas fa-plus-circle text-xl"></i>
+                <span class="text-xs mt-1">New Log</span>
+            </button>
+            <button @click="exportAllPDF()" class="flex flex-col items-center text-gray-600">
+                <i class="fas fa-file-export text-xl"></i>
+                <span class="text-xs mt-1">Export</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-600">
+                <i class="fas fa-history text-xl"></i>
+                <span class="text-xs mt-1">History</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-600">
+                <i class="fas fa-cog text-xl"></i>
+                <span class="text-xs mt-1">Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header with WiredWise Logo -->
+    <header class="bg-gradient-to-r from-primary to-secondary shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                   
+                    <div class="ml-3">
+                        <h1 class="text-xl md:text-2xl font-bold text-white">WiredWise</h1>
+                        <p class="text-orange-100 text-xs md:text-sm">Client Work Logger</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-3">
+                    <button @click="showForm = true" class="px-4 py-2 bg-white text-primary font-medium rounded-lg hover:bg-orange-50 flex items-center shadow-md">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        New Log
+                    </button>
+                    <button @click="exportAllPDF()" class="px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-gray-700 flex items-center shadow-md">
+                        <i class="fas fa-file-export mr-2"></i>
+                        Export All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Stats Section -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="section-card p-4">
+                <div class="flex items-center">
+                    <div class="bg-orange-100 p-2 rounded-lg">
+                        <i class="fas fa-file-alt text-primary text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">Total Logs</p>
+                        <p class="text-lg font-bold text-gray-800" x-text="logs.length"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-card p-4">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-2 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">Completed</p>
+                        <p class="text-lg font-bold text-gray-800" x-text="completedLogs"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-card p-4">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <i class="fas fa-clock text-blue-600 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">Pending</p>
+                        <p class="text-lg font-bold text-gray-800" x-text="pendingLogs"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-card p-4">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-2 rounded-lg">
+                        <i class="fas fa-users text-purple-600 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">Clients</p>
+                        <p class="text-lg font-bold text-gray-800" x-text="activeClients"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search and Actions -->
+        <div class="section-card p-4 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div class="relative flex-grow">
+                    <input 
+                        type="text" 
+                        x-model="searchQuery" 
+                        placeholder="Search logs..." 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
+                    >
+                    <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-filter"></i>
+                        <span class="hidden md:inline ml-1">Filter</span>
+                    </button>
+                    <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-sort"></i>
+                        <span class="hidden md:inline ml-1">Sort</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Log Entries -->
+        <div class="section-card overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                <h2 class="hierarchy-1">Recent Client Logs</h2>
+            </div>
+            
+            <div class="divide-y divide-gray-100">
+                <template x-for="(log, index) in filteredLogs" :key="index">
+                    <div class="log-entry p-4 hover:bg-orange-50">
+                        <div class="flex flex-col">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="hierarchy-1 font-bold" x-text="log.clientName"></h3>
+                                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                        <span x-text="log.location"></span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <div class="text-sm text-gray-500" x-text="formatDate(log.date)"></div>
+                                    <div class="mt-1">
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
+                                            'bg-green-100 text-green-800': log.status === 'Completed',
+                                            'bg-blue-100 text-blue-800': log.status === 'In Progress',
+                                            'bg-yellow-100 text-yellow-800': log.status === 'Pending',
+                                            'bg-orange-100 text-orange-800': log.status === 'Follow-up Required'
+                                        }" x-text="log.status"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h4 class="hierarchy-2 font-semibold text-gray-700">Work Summary</h4>
+                                <p class="hierarchy-3 mt-1 text-gray-600" x-text="log.workSummary"></p>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
+                                <div class="mt-1 flex flex-wrap">
+                                    <template x-for="(tech, i) in log.technicians" :key="i">
+                                        <span class="technician-tag">
+                                            <i class="fas fa-user mr-1"></i>
+                                            <span x-text="tech"></span>
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button @click="viewLog(index)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    <span class="hidden sm:inline">View</span>
+                                </button>
+                                <button @click="exportPDF(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
+                                    <i class="fas fa-file-pdf mr-1 text-red-500"></i>
+                                    <span class="hidden sm:inline">PDF</span>
+                                </button>
+                                <button @click="exportImage(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
+                                    <i class="fas fa-image mr-1 text-blue-500"></i>
+                                    <span class="hidden sm:inline">Image</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                
+                <div x-show="filteredLogs.length === 0" class="p-8 text-center">
+                    <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-alt text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="hierarchy-1 mt-4 text-gray-700">No logs found</h3>
+                    <p class="hierarchy-3 mt-1 text-gray-500" x-text="logs.length === 0 ? 'Create your first log' : 'Try a different search'"></p>
+                    <button x-show="logs.length === 0" @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
+                        Create Log
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Log Form Modal -->
+    <div x-show="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="px-4 py-3 bg-gradient-to-r from-primary to-secondary flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-white" x-text="editingIndex !== null ? 'Edit Log' : 'Create New Log'"></h2>
+                <button @click="closeForm()" class="text-white hover:text-orange-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form @submit.prevent="saveLog" class="p-4 space-y-5">
+                <!-- Client Information -->
+                <div class="section-card p-4">
+                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
+                        <i class="fas fa-building mr-2"></i>Client Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Client Name *</label>
+                            <input type="text" x-model="currentLog.clientName" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Acme Corporation" required>
+                        </div>
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Location *</label>
+                            <input type="text" x-model="currentLog.location" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="123 Main St, City" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Work Information -->
+                <div class="section-card p-4">
+                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
+                        <i class="fas fa-tasks mr-2"></i>Work Information
+                    </h3>
+                    <div class="mb-4">
+                        <label class="hierarchy-3 block text-gray-700 mb-2">Work Summary *</label>
+                        <textarea x-model="currentLog.workSummary" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Describe the work performed..." required></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Work Details</label>
+                            <textarea x-model="currentLog.workDetails" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Step-by-step details..."></textarea>
+                        </div>
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Issues & Solutions</label>
+                            <textarea x-model="currentLog.issues" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Any issues and resolutions..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="hierarchy-3 block text-gray-700 mb-2">Recommendations & Notes</label>
+                        <textarea x-model="currentLog.recommendations" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Important recommendations and notes..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Status & Technicians -->
+                <div class="section-card p-4">
+                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
+                        <i class="fas fa-info-circle mr-2"></i>Log Details
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Status</label>
+                            <select x-model="currentLog.status" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary">
+                                <option>Completed</option>
+                                <option>In Progress</option>
+                                <option>Pending</option>
+                                <option>Follow-up Required</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="hierarchy-3 block text-gray-700 mb-2">Date *</label>
+                            <input type="date" x-model="currentLog.date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="hierarchy-3 block text-gray-700 mb-2">Technicians *</label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                x-model="techInput" 
+                                @keydown.enter.prevent="addTechnician()"
+                                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" 
+                                placeholder="Enter technician name and press Enter"
+                            >
+                            <button 
+                                type="button" 
+                                @click="addTechnician()" 
+                                class="absolute right-2 top-2 text-primary hover:text-orange-600"
+                            >
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 flex flex-wrap">
+                            <template x-for="(tech, index) in currentLog.technicians" :key="index">
+                                <div class="technician-tag">
+                                    <span x-text="tech"></span>
+                                    <button type="button" @click="removeTechnician(index)" class="ml-2 text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Signature -->
+                <div class="section-card p-4">
+                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
+                        <i class="fas fa-signature mr-2"></i>Client Signature
+                    </h3>
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <canvas x-ref="signaturePad" class="w-full h-32 signature-canvas"></canvas>
+                        <div class="mt-2 flex justify-end">
+                            <button type="button" @click="clearSignature" class="px-3 py-1 text-sm text-red-600 hover:text-red-800">
+                                <i class="fas fa-eraser mr-1"></i>Clear Signature
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" @click="closeForm()" class="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
+                        Save Log
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- View Log Modal -->
+    <div x-show="viewingIndex !== null" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="px-4 py-3 bg-gradient-to-r from-primary to-secondary flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-white">Work Log Details</h2>
+                <button @click="viewingIndex = null" class="text-white hover:text-orange-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-4" x-ref="logDetails">
+                <template x-if="viewingIndex !== null">
+                    <div class="space-y-5">
+                        <!-- Client Info -->
+                        <div class="section-card p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="hierarchy-1 font-bold text-gray-800" x-text="logs[viewingIndex].clientName"></h3>
+                                    <div class="flex items-center text-gray-600 mt-1">
+                                        <i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>
+                                        <span x-text="logs[viewingIndex].location"></span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="hierarchy-3 text-gray-700" x-text="formatDate(logs[viewingIndex].date)"></div>
+                                    <div class="mt-2">
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
+                                            'bg-green-100 text-green-800': logs[viewingIndex].status === 'Completed',
+                                            'bg-blue-100 text-blue-800': logs[viewingIndex].status === 'In Progress',
+                                            'bg-yellow-100 text-yellow-800': logs[viewingIndex].status === 'Pending',
+                                            'bg-orange-100 text-orange-800': logs[viewingIndex].status === 'Follow-up Required'
+                                        }" x-text="logs[viewingIndex].status"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Work Summary -->
+                        <div class="section-card p-4">
+                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Work Summary</h4>
+                            <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].workSummary"></p>
+                        </div>
+                        
+                        <!-- Details & Issues -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="section-card p-4">
+                                <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Work Details</h4>
+                                <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].workDetails || 'No additional details provided'"></p>
+                            </div>
+                            <div class="section-card p-4">
+                                <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Issues & Solutions</h4>
+                                <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].issues || 'No issues reported'"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommendations -->
+                        <div class="section-card p-4">
+                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Recommendations & Key Notes</h4>
+                            <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].recommendations || 'No recommendations provided'"></p>
+                        </div>
+                        
+                        <!-- Technicians -->
+                        <div class="section-card p-4">
+                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Technicians</h4>
+                            <div class="flex flex-wrap">
+                                <template x-for="(tech, i) in logs[viewingIndex].technicians" :key="i">
+                                    <div class="technician-tag">
+                                        <i class="fas fa-user mr-1"></i>
+                                        <span x-text="tech"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        
+                        <!-- Signature -->
+                        <div class="section-card p-4">
+                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Client Signature</h4>
+                            <div class="mt-2 flex justify-center">
+                                <img :src="logs[viewingIndex].signature" alt="Client Signature" class="max-w-xs border border-gray-200 p-2 bg-white">
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex flex-wrap gap-3">
+                            <button @click="exportPDF(viewingIndex)" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 flex items-center">
+                                <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                            </button>
+                            <button @click="exportImage(viewingIndex)" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center">
+                                <i class="fas fa-image mr-2"></i>Download Image
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('logApp', () => ({
+                showForm: false,
+                viewingIndex: null,
+                editingIndex: null,
+                signaturePad: null,
+                techInput: '',
+                searchQuery: '',
+                
+                currentLog: {
+                    clientName: '',
+                    location: '',
+                    workSummary: '',
+                    workDetails: '',
+                    issues: '',
+                    recommendations: '',
+                    status: 'Completed',
+                    technicians: [],
+                    date: new Date().toISOString().split('T')[0],
+                    signature: null
+                },
+                
+                logs: JSON.parse(localStorage.getItem('clientLogs')) || [],
+                
+                init() {
+                    // Initialize signature pad
+                    this.signaturePad = new SignaturePad(this.$refs.signaturePad, {
+                        backgroundColor: 'rgb(255, 255, 255)',
+                        penColor: 'rgb(0, 0, 0)',
+                        minWidth: 1,
+                        maxWidth: 3
+                    });
+                    
+                    // Load technician name from localStorage if exists
+                    if (localStorage.getItem('technicianName')) {
+                        this.currentLog.technicians = [localStorage.getItem('technicianName')];
+                    }
+                },
+                
+                addTechnician() {
+                    if (this.techInput.trim() !== '') {
+                        this.currentLog.technicians.push(this.techInput.trim());
+                        this.techInput = '';
+                    }
+                },
+                
+                removeTechnician(index) {
+                    this.currentLog.technicians.splice(index, 1);
+                },
+                
+                saveLog() {
+                    // Validate technicians
+                    if (this.currentLog.technicians.length === 0) {
+                        alert('Please add at least one technician');
+                        return;
+                    }
+                    
+                    // Capture signature
+                    if (!this.signaturePad.isEmpty()) {
+                        this.currentLog.signature = this.signaturePad.toDataURL();
+                    }
+                    
+                    // Save technician name for future logs
+                    if (this.currentLog.technicians.length > 0) {
+                        localStorage.setItem('technicianName', this.currentLog.technicians[0]);
+                    }
+                    
+                    if (this.editingIndex !== null) {
+                        // Update existing log
+                        this.logs[this.editingIndex] = {...this.currentLog};
+                    } else {
+                        // Add new log
+                        this.logs.unshift({...this.currentLog});
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('clientLogs', JSON.stringify(this.logs));
+                    
+                    // Reset form
+                    this.signaturePad.clear();
+                    this.techInput = '';
+                    this.currentLog = {
+                        clientName: '',
+                        location: '',
+                        workSummary: '',
+                        workDetails: '',
+                        issues: '',
+                        recommendations: '',
+                        status: 'Completed',
+                        technicians: localStorage.getItem('technicianName') ? [localStorage.getItem('technicianName')] : [],
+                        date: new Date().toISOString().split('T')[0],
+                        signature: null
+                    };
+                    
+                    this.showForm = false;
+                    this.editingIndex = null;
+                },
+                
+                viewLog(index) {
+                    this.viewingIndex = index;
+                },
+                
+                clearSignature() {
+                    this.signaturePad.clear();
+                },
+                
+                closeForm() {
+                    this.showForm = false;
+                    this.editingIndex = null;
+                    this.signaturePad.clear();
+                    this.techInput = '';
+                },
+                
+                formatDate(dateString) {
+                    return moment(dateString).format('MMM D, YYYY');
+                },
+                
+                exportPDF(index) {
+                    const log = this.logs[index];
+                    const doc = new jspdf.jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    // Add WiredWise header
+                    doc.setFillColor(241, 100, 17);
+                    doc.rect(0, 0, 210, 20, 'F');
+                    
+                    doc.setFontSize(16);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('WiredWise Client Work Log', 105, 12, { align: 'center' });
+                    
+                    // Add content
+                    doc.setFontSize(12);
+                    doc.setTextColor(100);
+                    doc.text(`Date: ${this.formatDate(log.date)}`, 20, 30);
+                    doc.text(`Status: ${log.status}`, 170, 30, { align: 'right' });
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(0);
+                    doc.text(`Client: ${log.clientName}`, 20, 40);
+                    doc.text(`Location: ${log.location}`, 20, 50);
+                    
+                    // Technicians
+                    doc.text(`Technicians: ${log.technicians.join(', ')}`, 20, 60);
+                    
+                    // Work Summary
+                    doc.setFontSize(12);
+                    doc.text('Work Summary:', 20, 70);
+                    doc.setFontSize(11);
+                    const splitSummary = doc.splitTextToSize(log.workSummary, 170);
+                    doc.text(splitSummary, 20, 75);
+                    
+                    let yPosition = 75 + (splitSummary.length * 5);
+                    
+                    // Work Details
+                    if (log.workDetails) {
+                        doc.setFontSize(12);
+                        doc.text('Work Details:', 20, yPosition + 5);
+                        doc.setFontSize(11);
+                        const splitDetails = doc.splitTextToSize(log.workDetails, 170);
+                        doc.text(splitDetails, 20, yPosition + 10);
+                        yPosition += 10 + (splitDetails.length * 5);
+                    }
+                    
+                    // Issues
+                    if (log.issues) {
+                        doc.setFontSize(12);
+                        doc.text('Issues & Solutions:', 20, yPosition + 5);
+                        doc.setFontSize(11);
+                        const splitIssues = doc.splitTextToSize(log.issues, 170);
+                        doc.text(splitIssues, 20, yPosition + 10);
+                        yPosition += 10 + (splitIssues.length * 5);
+                    }
+                    
+                    // Recommendations
+                    if (log.recommendations) {
+                        doc.setFontSize(12);
+                        doc.text('Recommendations & Notes:', 20, yPosition + 5);
+                        doc.setFontSize(11);
+                        const splitRecs = doc.splitTextToSize(log.recommendations, 170);
+                        doc.text(splitRecs, 20, yPosition + 10);
+                        yPosition += 10 + (splitRecs.length * 5);
+                    }
+                    
+                    // Signature
+                    if (log.signature) {
+                        const signatureImg = new Image();
+                        signatureImg.src = log.signature;
+                        
+                        signatureImg.onload = () => {
+                            doc.addImage(signatureImg, 'PNG', 20, yPosition + 15, 60, 20);
+                            doc.text('Client Signature:', 20, yPosition + 40);
+                            
+                            // Add footer
+                            doc.setFontSize(10);
+                            doc.setTextColor(100);
+                            doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
+                            
+                            doc.save(`wiredwise-log-${log.clientName}-${log.date}.pdf`);
+                        };
+                    } else {
+                        // Add footer
+                        doc.setFontSize(10);
+                        doc.setTextColor(100);
+                        doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
+                        
+                        doc.save(`wiredwise-log-${log.clientName}-${log.date}.pdf`);
+                    }
+                },
+                
+                exportImage(index) {
+                    this.viewingIndex = index;
+                    
+                    setTimeout(() => {
+                        html2canvas(this.$refs.logDetails).then(canvas => {
+                            const imgData = canvas.toDataURL('image/png');
+                            const link = document.createElement('a');
+                            link.href = imgData;
+                            link.download = `wiredwise-log-${this.logs[index].clientName}-${this.logs[index].date}.png`;
+                            link.click();
+                        });
+                    }, 500);
+                },
+                
+                exportAllPDF() {
+                    if (this.logs.length === 0) return;
+                    
+                    const doc = new jspdf.jsPDF();
+                    
+                    this.logs.forEach((log, index) => {
+                        if (index > 0) doc.addPage();
+                        
+                        // Add WiredWise header
+                        doc.setFillColor(241, 100, 17);
+                        doc.rect(0, 0, 210, 20, 'F');
+                        
+                        doc.setFontSize(16);
+                        doc.setTextColor(255, 255, 255);
+                        doc.text('WiredWise Client Work Log', 105, 12, { align: 'center' });
+                        
+                        // Client info
+                        doc.setFontSize(12);
+                        doc.setTextColor(100);
+                        doc.text(`Date: ${this.formatDate(log.date)}`, 20, 30);
+                        doc.text(`Status: ${log.status}`, 170, 30, { align: 'right' });
+                        
+                        doc.setFontSize(14);
+                        doc.setTextColor(0);
+                        doc.text(`Client: ${log.clientName}`, 20, 40);
+                        doc.text(`Location: ${log.location}`, 20, 50);
+                        
+                        // Work Summary
+                        doc.setFontSize(12);
+                        doc.text('Work Summary:', 20, 60);
+                        doc.setFontSize(11);
+                        const splitSummary = doc.splitTextToSize(log.workSummary, 170);
+                        doc.text(splitSummary, 20, 65);
+                        
+                        let yPosition = 65 + (splitSummary.length * 5);
+                        
+                        // Recommendations
+                        if (log.recommendations) {
+                            doc.setFontSize(12);
+                            doc.text('Recommendations:', 20, yPosition + 5);
+                            doc.setFontSize(11);
+                            const splitRecs = doc.splitTextToSize(log.recommendations, 170);
+                            doc.text(splitRecs, 20, yPosition + 10);
+                            yPosition += 10 + (splitRecs.length * 5);
+                        }
+                        
+                        // Technicians
+                        doc.setFontSize(12);
+                        doc.text(`Technicians: ${log.technicians.join(', ')}`, 20, yPosition + 15);
+                        
+                        // Add footer
+                        doc.setFontSize(10);
+                        doc.setTextColor(100);
+                        doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
+                    });
+                    
+                    doc.save('wiredwise-all-logs.pdf');
+                },
+                
+                get filteredLogs() {
+                    if (!this.searchQuery) return this.logs;
+                    const query = this.searchQuery.toLowerCase();
+                    return this.logs.filter(log => 
+                        log.clientName.toLowerCase().includes(query) || 
+                        log.location.toLowerCase().includes(query) ||
+                        log.workSummary.toLowerCase().includes(query) ||
+                        log.technicians.some(tech => tech.toLowerCase().includes(query))
+                    );
+                },
+                
+                get completedLogs() {
+                    return this.logs.filter(log => log.status === 'Completed').length;
+                },
+                
+                get pendingLogs() {
+                    return this.logs.filter(log => log.status === 'Follow-up Required' || log.status === 'Pending').length;
+                },
+                
+                get activeClients() {
+                    const clientNames = this.logs.map(log => log.clientName);
+                    const uniqueClients = new Set(clientNames);
+                    return uniqueClients.size;
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
