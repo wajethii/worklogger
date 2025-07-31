@@ -18,6 +18,8 @@
                         primary: '#F16411',
                         secondary: '#F6940E',
                         accent: '#2D3748',
+                        urgent: '#E53E3E',
+                        followup: '#DD6B20'
                     }
                 }
             }
@@ -48,6 +50,17 @@
             margin-right: 8px;
             margin-bottom: 8px;
         }
+        .urgent-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(229, 62, 62, 0.1);
+            color: #E53E3E;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.875rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
         .section-card {
             background: white;
             border-radius: 12px;
@@ -69,6 +82,33 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             z-index: 50;
         }
+        .urgent-section {
+            border-left: 4px solid #E53E3E;
+            background-color: #FFF5F5;
+        }
+        .urgent-badge {
+            background-color: #FED7D7;
+            color: #E53E3E;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .followup-badge {
+            background-color: #FEEBC8;
+            color: #DD6B20;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .client-card {
+            transition: all 0.2s ease;
+        }
+        .client-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
         @media (min-width: 768px) {
             .mobile-menu {
                 display: none;
@@ -88,13 +128,13 @@
                 <i class="fas fa-file-export text-xl"></i>
                 <span class="text-xs mt-1">Export</span>
             </button>
-            <button class="flex flex-col items-center text-gray-600">
-                <i class="fas fa-history text-xl"></i>
-                <span class="text-xs mt-1">History</span>
+            <button @click="activeTab = 'clients'" class="flex flex-col items-center" :class="activeTab === 'clients' ? 'text-primary' : 'text-gray-600'">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-xs mt-1">Clients</span>
             </button>
-            <button class="flex flex-col items-center text-gray-600">
-                <i class="fas fa-cog text-xl"></i>
-                <span class="text-xs mt-1">Settings</span>
+            <button @click="activeTab = 'logs'" class="flex flex-col items-center" :class="activeTab === 'logs' ? 'text-primary' : 'text-gray-600'">
+                <i class="fas fa-list text-xl"></i>
+                <span class="text-xs mt-1">Logs</span>
             </button>
         </div>
     </div>
@@ -104,7 +144,6 @@
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                   
                     <div class="ml-3">
                         <h1 class="text-xl md:text-2xl font-bold text-white">WiredWise</h1>
                         <p class="text-orange-100 text-xs md:text-sm">Client Work Logger</p>
@@ -126,6 +165,16 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Tabs for Mobile -->
+        <div class="md:hidden flex mb-6">
+            <button @click="activeTab = 'clients'" class="flex-1 py-3 text-center font-medium" :class="activeTab === 'clients' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'">
+                Clients
+            </button>
+            <button @click="activeTab = 'logs'" class="flex-1 py-3 text-center font-medium" :class="activeTab === 'logs' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'">
+                Logs
+            </button>
+        </div>
+        
         <!-- Stats Section -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="section-card p-4">
@@ -177,106 +226,247 @@
             </div>
         </div>
         
-        <!-- Search and Actions -->
-        <div class="section-card p-4 mb-6">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div class="relative flex-grow">
-                    <input 
-                        type="text" 
-                        x-model="searchQuery" 
-                        placeholder="Search logs..." 
-                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                    >
-                    <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+        <!-- Clients Section -->
+        <div x-show="activeTab === 'clients'" class="space-y-6">
+            <!-- Urgent Follow-ups Section -->
+            <div class="urgent-section section-card overflow-hidden" x-show="urgentFollowups.length > 0">
+                <div class="px-4 py-3 border-b border-red-100 bg-red-50 flex items-center justify-between">
+                    <h2 class="hierarchy-1 text-urgent flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Urgent Follow-ups
+                    </h2>
+                    <span class="urgent-badge" x-text="urgentFollowups.length + ' urgent'"></span>
                 </div>
-                <div class="flex space-x-2">
-                    <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-filter"></i>
-                        <span class="hidden md:inline ml-1">Filter</span>
-                    </button>
-                    <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-sort"></i>
-                        <span class="hidden md:inline ml-1">Sort</span>
-                    </button>
+                
+                <div class="divide-y divide-red-100">
+                    <template x-for="(client, index) in urgentFollowups" :key="index">
+                        <div class="log-entry p-4 hover:bg-red-50">
+                            <div class="flex flex-col">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="hierarchy-1 font-bold" x-text="client.name"></h3>
+                                        <div class="flex items-center text-sm text-gray-500 mt-1">
+                                            <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                            <span x-text="client.location"></span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500" x-text="formatDate(client.lastLogDate)"></div>
+                                        <div class="mt-1">
+                                            <span class="followup-badge">Follow-up Required</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Last Work Summary</h4>
+                                    <p class="hierarchy-3 mt-1 text-gray-600" x-text="client.lastWorkSummary"></p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
+                                    <div class="mt-1 flex flex-wrap">
+                                        <template x-for="(tech, i) in client.technicians" :key="i">
+                                            <span class="technician-tag">
+                                                <i class="fas fa-user mr-1"></i>
+                                                <span x-text="tech"></span>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <button @click="viewClientLogs(client.name)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        <span>View Logs</span>
+                                    </button>
+                                    <button @click="createFollowupLog(client)" class="px-3 py-2 bg-urgent hover:bg-red-700 text-white rounded-lg flex items-center shadow-sm">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        <span>New Follow-up</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            <!-- Client List -->
+            <div class="section-card overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h2 class="hierarchy-1">Client List</h2>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            x-model="clientSearch" 
+                            placeholder="Search clients..." 
+                            class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
+                        >
+                        <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    <template x-for="(client, index) in filteredClients" :key="index">
+                        <div class="client-card section-card p-4 hover:bg-orange-50">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="hierarchy-1 font-bold flex items-center">
+                                        <span x-text="client.name"></span>
+                                        <span x-show="client.followups > 0" class="followup-badge ml-2" x-text="client.followups + ' follow-up'"></span>
+                                    </h3>
+                                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                        <span x-text="client.location"></span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-500" x-text="formatDate(client.lastLogDate)"></div>
+                                    <div class="mt-1">
+                                        <span class="text-xs font-medium" :class="{
+                                            'text-green-600': client.lastStatus === 'Completed',
+                                            'text-blue-600': client.lastStatus === 'In Progress',
+                                            'text-yellow-600': client.lastStatus === 'Pending',
+                                            'text-red-600': client.lastStatus === 'Follow-up Required'
+                                        }" x-text="client.lastStatus"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm text-gray-500">Logs:</span>
+                                    <span class="text-sm font-medium ml-1" x-text="client.logCount"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button @click="viewClientLogs(client.name)" class="text-primary hover:text-orange-700">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button @click="createClientLog(client)" class="text-primary hover:text-orange-700">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div x-show="filteredClients.length === 0" class="col-span-full p-8 text-center">
+                        <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
+                            <i class="fas fa-users text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="hierarchy-1 mt-4 text-gray-700">No clients found</h3>
+                        <p class="hierarchy-3 mt-1 text-gray-500">Create your first client log</p>
+                        <button @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
+                            Create Log
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Log Entries -->
-        <div class="section-card overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <h2 class="hierarchy-1">Recent Client Logs</h2>
+        <!-- Logs Section -->
+        <div x-show="activeTab === 'logs'" class="space-y-6">
+            <!-- Search and Actions -->
+            <div class="section-card p-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div class="relative flex-grow">
+                        <input 
+                            type="text" 
+                            x-model="searchQuery" 
+                            placeholder="Search logs..." 
+                            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
+                        >
+                        <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-filter"></i>
+                            <span class="hidden md:inline ml-1">Filter</span>
+                        </button>
+                        <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-sort"></i>
+                            <span class="hidden md:inline ml-1">Sort</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             
-            <div class="divide-y divide-gray-100">
-                <template x-for="(log, index) in filteredLogs" :key="index">
-                    <div class="log-entry p-4 hover:bg-orange-50">
-                        <div class="flex flex-col">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="hierarchy-1 font-bold" x-text="log.clientName"></h3>
-                                    <div class="flex items-center text-sm text-gray-500 mt-1">
-                                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
-                                        <span x-text="log.location"></span>
+            <!-- Log Entries -->
+            <div class="section-card overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <h2 class="hierarchy-1">Recent Client Logs</h2>
+                </div>
+                
+                <div class="divide-y divide-gray-100">
+                    <template x-for="(log, index) in filteredLogs" :key="index">
+                        <div class="log-entry p-4 hover:bg-orange-50">
+                            <div class="flex flex-col">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="hierarchy-1 font-bold" x-text="log.clientName"></h3>
+                                        <div class="flex items-center text-sm text-gray-500 mt-1">
+                                            <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                            <span x-text="log.location"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <div class="text-sm text-gray-500" x-text="formatDate(log.date)"></div>
+                                        <div class="mt-1">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
+                                                'bg-green-100 text-green-800': log.status === 'Completed',
+                                                'bg-blue-100 text-blue-800': log.status === 'In Progress',
+                                                'bg-yellow-100 text-yellow-800': log.status === 'Pending',
+                                                'bg-red-100 text-red-800': log.status === 'Follow-up Required'
+                                            }" x-text="log.status"></span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-end">
-                                    <div class="text-sm text-gray-500" x-text="formatDate(log.date)"></div>
-                                    <div class="mt-1">
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
-                                            'bg-green-100 text-green-800': log.status === 'Completed',
-                                            'bg-blue-100 text-blue-800': log.status === 'In Progress',
-                                            'bg-yellow-100 text-yellow-800': log.status === 'Pending',
-                                            'bg-orange-100 text-orange-800': log.status === 'Follow-up Required'
-                                        }" x-text="log.status"></span>
+                                
+                                <div class="mt-3">
+                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Work Summary</h4>
+                                    <p class="hierarchy-3 mt-1 text-gray-600" x-text="log.workSummary"></p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
+                                    <div class="mt-1 flex flex-wrap">
+                                        <template x-for="(tech, i) in log.technicians" :key="i">
+                                            <span class="technician-tag">
+                                                <i class="fas fa-user mr-1"></i>
+                                                <span x-text="tech"></span>
+                                            </span>
+                                        </template>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="mt-3">
-                                <h4 class="hierarchy-2 font-semibold text-gray-700">Work Summary</h4>
-                                <p class="hierarchy-3 mt-1 text-gray-600" x-text="log.workSummary"></p>
-                            </div>
-                            
-                            <div class="mt-3">
-                                <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
-                                <div class="mt-1 flex flex-wrap">
-                                    <template x-for="(tech, i) in log.technicians" :key="i">
-                                        <span class="technician-tag">
-                                            <i class="fas fa-user mr-1"></i>
-                                            <span x-text="tech"></span>
-                                        </span>
-                                    </template>
+                                
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <button @click="viewLog(index)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        <span class="hidden sm:inline">View</span>
+                                    </button>
+                                    <button @click="exportPDF(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
+                                        <i class="fas fa-file-pdf mr-1 text-red-500"></i>
+                                        <span class="hidden sm:inline">PDF</span>
+                                    </button>
+                                    <button @click="exportImage(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
+                                        <i class="fas fa-image mr-1 text-blue-500"></i>
+                                        <span class="hidden sm:inline">Image</span>
+                                    </button>
                                 </div>
-                            </div>
-                            
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <button @click="viewLog(index)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
-                                    <i class="fas fa-eye mr-1"></i>
-                                    <span class="hidden sm:inline">View</span>
-                                </button>
-                                <button @click="exportPDF(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
-                                    <i class="fas fa-file-pdf mr-1 text-red-500"></i>
-                                    <span class="hidden sm:inline">PDF</span>
-                                </button>
-                                <button @click="exportImage(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
-                                    <i class="fas fa-image mr-1 text-blue-500"></i>
-                                    <span class="hidden sm:inline">Image</span>
-                                </button>
                             </div>
                         </div>
+                    </template>
+                    
+                    <div x-show="filteredLogs.length === 0" class="p-8 text-center">
+                        <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-alt text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="hierarchy-1 mt-4 text-gray-700">No logs found</h3>
+                        <p class="hierarchy-3 mt-1 text-gray-500" x-text="logs.length === 0 ? 'Create your first log' : 'Try a different search'"></p>
+                        <button x-show="logs.length === 0" @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
+                            Create Log
+                        </button>
                     </div>
-                </template>
-                
-                <div x-show="filteredLogs.length === 0" class="p-8 text-center">
-                    <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
-                        <i class="fas fa-file-alt text-primary text-2xl"></i>
-                    </div>
-                    <h3 class="hierarchy-1 mt-4 text-gray-700">No logs found</h3>
-                    <p class="hierarchy-3 mt-1 text-gray-500" x-text="logs.length === 0 ? 'Create your first log' : 'Try a different search'"></p>
-                    <button x-show="logs.length === 0" @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
-                        Create Log
-                    </button>
                 </div>
             </div>
         </div>
@@ -447,7 +637,7 @@
                                             'bg-green-100 text-green-800': logs[viewingIndex].status === 'Completed',
                                             'bg-blue-100 text-blue-800': logs[viewingIndex].status === 'In Progress',
                                             'bg-yellow-100 text-yellow-800': logs[viewingIndex].status === 'Pending',
-                                            'bg-orange-100 text-orange-800': logs[viewingIndex].status === 'Follow-up Required'
+                                            'bg-red-100 text-red-800': logs[viewingIndex].status === 'Follow-up Required'
                                         }" x-text="logs[viewingIndex].status"></span>
                                     </div>
                                 </div>
@@ -523,6 +713,8 @@
                 signaturePad: null,
                 techInput: '',
                 searchQuery: '',
+                clientSearch: '',
+                activeTab: 'logs', // Default to logs tab
                 
                 currentLog: {
                     clientName: '',
@@ -551,6 +743,11 @@
                     // Load technician name from localStorage if exists
                     if (localStorage.getItem('technicianName')) {
                         this.currentLog.technicians = [localStorage.getItem('technicianName')];
+                    }
+                    
+                    // Set active tab based on screen size
+                    if (window.innerWidth < 768) {
+                        this.activeTab = 'clients';
                     }
                 },
                 
@@ -800,6 +997,25 @@
                     doc.save('wiredwise-all-logs.pdf');
                 },
                 
+                viewClientLogs(clientName) {
+                    this.clientSearch = clientName;
+                    this.activeTab = 'logs';
+                    this.searchQuery = clientName;
+                },
+                
+                createClientLog(client) {
+                    this.showForm = true;
+                    this.currentLog.clientName = client.name;
+                    this.currentLog.location = client.location;
+                },
+                
+                createFollowupLog(client) {
+                    this.showForm = true;
+                    this.currentLog.clientName = client.name;
+                    this.currentLog.location = client.location;
+                    this.currentLog.status = 'Follow-up Required';
+                },
+                
                 get filteredLogs() {
                     if (!this.searchQuery) return this.logs;
                     const query = this.searchQuery.toLowerCase();
@@ -823,6 +1039,57 @@
                     const clientNames = this.logs.map(log => log.clientName);
                     const uniqueClients = new Set(clientNames);
                     return uniqueClients.size;
+                },
+                
+                get clients() {
+                    const clientsMap = new Map();
+                    
+                    this.logs.forEach(log => {
+                        if (!clientsMap.has(log.clientName)) {
+                            clientsMap.set(log.clientName, {
+                                name: log.clientName,
+                                location: log.location,
+                                lastLogDate: log.date,
+                                lastStatus: log.status,
+                                lastWorkSummary: log.workSummary,
+                                technicians: [...new Set(log.technicians)], // Unique technicians
+                                logCount: 0,
+                                followups: 0
+                            });
+                        }
+                        
+                        const client = clientsMap.get(log.clientName);
+                        client.logCount++;
+                        
+                        // Update if this log is more recent
+                        if (new Date(log.date) > new Date(client.lastLogDate)) {
+                            client.lastLogDate = log.date;
+                            client.lastStatus = log.status;
+                            client.lastWorkSummary = log.workSummary;
+                        }
+                        
+                        // Count follow-up required logs
+                        if (log.status === 'Follow-up Required') {
+                            client.followups++;
+                        }
+                    });
+                    
+                    return Array.from(clientsMap.values());
+                },
+                
+                get filteredClients() {
+                    if (!this.clientSearch) return this.clients;
+                    const query = this.clientSearch.toLowerCase();
+                    return this.clients.filter(client => 
+                        client.name.toLowerCase().includes(query) || 
+                        client.location.toLowerCase().includes(query)
+                    );
+                },
+                
+                get urgentFollowups() {
+                    return this.clients.filter(client => 
+                        client.lastStatus === 'Follow-up Required'
+                    ).sort((a, b) => new Date(b.lastLogDate) - new Date(a.lastLogDate));
                 }
             }));
         });
