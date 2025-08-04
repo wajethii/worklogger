@@ -3,77 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiredWise Client Logger</title>
+    <title>WiredWise - Mobile Work Logger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#F16411',
-                        secondary: '#F6940E',
-                        accent: '#2D3748',
-                        urgent: '#E53E3E',
-                        followup: '#DD6B20'
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f8f9fa;
+        :root {
+            --primary: #F16411;
+            --primary-light: #fdf0e8;
+            --secondary: #F6940E;
+            --accent: #2D3748;
+            --urgent: #E53E3E;
+            --followup: #DD6B20;
+            --ai: #4F46E5;
+            --success: #38A169;
+            --gray-100: #F7FAFC;
+            --gray-200: #EDF2F7;
+            --gray-300: #E2E8F0;
+            --gray-500: #718096;
+            --gray-700: #4A5568;
+            --gray-900: #2D3748;
         }
-        .signature-canvas { touch-action: none; }
-        .log-entry { transition: all 0.3s ease; }
-        .log-entry:hover { transform: translateY(-3px); }
-        .wiredwise-logo {
-            background: linear-gradient(135deg, #F16411 0%, #F6940E 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+        
+        /* Typography hierarchy */
+        .h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .h4 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .body-text {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+        
+        .small-text {
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+        
+        .caption {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--gray-500);
+        }
+        
+        /* Layout Components */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+        
+        .btn-outline:hover {
+            background: var(--gray-100);
+        }
+        
+        .btn-danger {
+            background: var(--urgent);
+            color: white;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            background-color: #C6F6D5;
+            color: #22543D;
+        }
+        
+        .status-inprogress {
+            background-color: #BEE3F8;
+            color: #2A4365;
+        }
+        
+        .status-pending {
+            background-color: #FEFCBF;
+            color: #744210;
+        }
+        
+        .status-followup {
+            background-color: #FEB2B2;
+            color: #742A2A;
+        }
+        
         .technician-tag {
             display: inline-flex;
             align-items: center;
             background: rgba(241, 100, 17, 0.1);
-            color: #F16411;
+            color: var(--primary);
             border-radius: 20px;
-            padding: 4px 12px;
+            padding: 0.25rem 0.75rem;
             font-size: 0.875rem;
-            margin-right: 8px;
-            margin-bottom: 8px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
         }
-        .urgent-tag {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(229, 62, 62, 0.1);
-            color: #E53E3E;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.875rem;
-            margin-right: 8px;
-            margin-bottom: 8px;
-        }
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-        .section-card:hover {
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-        .hierarchy-1 { font-size: 1.25rem; font-weight: 600; color: #2D3748; }
-        .hierarchy-2 { font-size: 1.1rem; font-weight: 500; color: #4A5568; }
-        .hierarchy-3 { font-size: 1rem; font-weight: 400; color: #4A5568; }
-        .mobile-menu {
+        
+        /* Bottom Navigation */
+        .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -81,390 +196,551 @@
             background: white;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             z-index: 50;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
         }
-        .urgent-section {
-            border-left: 4px solid #E53E3E;
-            background-color: #FFF5F5;
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            color: var(--gray-500);
+            flex: 1;
+            text-decoration: none;
         }
-        .urgent-badge {
-            background-color: #FED7D7;
-            color: #E53E3E;
-            padding: 2px 8px;
-            border-radius: 12px;
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .nav-label {
             font-size: 0.75rem;
-            font-weight: 600;
         }
-        .followup-badge {
-            background-color: #FEEBC8;
-            color: #DD6B20;
-            padding: 2px 8px;
+        
+        /* Form Elements */
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(241, 100, 17, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 1.5rem 0;
+        }
+        
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mt-3 {
+            margin-top: 1rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+        
+        .p-4 {
+            padding: 1.5rem;
+        }
+        
+        .py-3 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-3 {
+            gap: 1rem;
+        }
+        
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: 1fr;
+        }
+        
+        .gap-3 {
+            gap: 1rem;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease-out;
+        }
+        
+        @keyframes modalIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        /* Log Preview */
+        .log-preview {
+            padding: 1.25rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .client-info {
+            flex: 1;
+        }
+        
+        .log-meta {
+            text-align: right;
+        }
+        
+        .log-content {
+            margin-top: 1.25rem;
+        }
+        
+        .log-section {
+            margin-bottom: 1.25rem;
+        }
+        
+        .log-section-title {
             font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .client-card {
-            transition: all 0.2s ease;
+        
+        .log-section-title i {
+            color: var(--primary);
         }
-        .client-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        
+        .log-section-content {
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 1rem;
+            line-height: 1.6;
         }
+        
+        .log-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        /* Responsive adjustments */
         @media (min-width: 768px) {
-            .mobile-menu {
+            .bottom-nav {
                 display: none;
+            }
+            
+            body {
+                padding-bottom: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .modal-content {
+                max-width: 600px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 2rem;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50" x-data="logApp()">
-    <!-- Mobile Menu -->
-    <div class="mobile-menu md:hidden">
-        <div class="flex justify-around py-3">
-            <button @click="showForm = true" class="flex flex-col items-center text-primary">
-                <i class="fas fa-plus-circle text-xl"></i>
-                <span class="text-xs mt-1">New Log</span>
-            </button>
-            <button @click="exportAllPDF()" class="flex flex-col items-center text-gray-600">
-                <i class="fas fa-file-export text-xl"></i>
-                <span class="text-xs mt-1">Export</span>
-            </button>
-            <button @click="activeTab = 'clients'" class="flex flex-col items-center" :class="activeTab === 'clients' ? 'text-primary' : 'text-gray-600'">
-                <i class="fas fa-users text-xl"></i>
-                <span class="text-xs mt-1">Clients</span>
-            </button>
-            <button @click="activeTab = 'logs'" class="flex flex-col items-center" :class="activeTab === 'logs' ? 'text-primary' : 'text-gray-600'">
-                <i class="fas fa-list text-xl"></i>
-                <span class="text-xs mt-1">Logs</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Header with WiredWise Logo -->
-    <header class="bg-gradient-to-r from-primary to-secondary shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <div class="ml-3">
-                        <h1 class="text-xl md:text-2xl font-bold text-white">WiredWise</h1>
-                        <p class="text-orange-100 text-xs md:text-sm">Client Work Logger</p>
-                    </div>
+<body>
+    <!-- Mobile Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1 class="h3">WiredWise</h1>
+                    <p class="caption">Work Logger</p>
                 </div>
-                <div class="hidden md:flex space-x-3">
-                    <button @click="showForm = true" class="px-4 py-2 bg-white text-primary font-medium rounded-lg hover:bg-orange-50 flex items-center shadow-md">
-                        <i class="fas fa-plus-circle mr-2"></i>
-                        New Log
-                    </button>
-                    <button @click="exportAllPDF()" class="px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-gray-700 flex items-center shadow-md">
-                        <i class="fas fa-file-export mr-2"></i>
-                        Export All
-                    </button>
-                </div>
+                <button id="newLogBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    <span class="hidden sm:inline">New Log</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
-        <!-- Tabs for Mobile -->
-        <div class="md:hidden flex mb-6">
-            <button @click="activeTab = 'clients'" class="flex-1 py-3 text-center font-medium" :class="activeTab === 'clients' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'">
-                Clients
-            </button>
-            <button @click="activeTab = 'logs'" class="flex-1 py-3 text-center font-medium" :class="activeTab === 'logs' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'">
-                Logs
-            </button>
-        </div>
-        
+    <main class="container">
         <!-- Stats Section -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="section-card p-4">
-                <div class="flex items-center">
-                    <div class="bg-orange-100 p-2 rounded-lg">
-                        <i class="fas fa-file-alt text-primary text-lg"></i>
+        <div class="section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #fdf0e8;">
+                        <i class="fas fa-file-alt" style="color: var(--primary);"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-xs text-gray-500">Total Logs</p>
-                        <p class="text-lg font-bold text-gray-800" x-text="logs.length"></p>
-                    </div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Total Logs</div>
                 </div>
-            </div>
-            
-            <div class="section-card p-4">
-                <div class="flex items-center">
-                    <div class="bg-green-100 p-2 rounded-lg">
-                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #def7ec;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-xs text-gray-500">Completed</p>
-                        <p class="text-lg font-bold text-gray-800" x-text="completedLogs"></p>
-                    </div>
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">Completed</div>
                 </div>
-            </div>
-            
-            <div class="section-card p-4">
-                <div class="flex items-center">
-                    <div class="bg-blue-100 p-2 rounded-lg">
-                        <i class="fas fa-clock text-blue-600 text-lg"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #ebf8ff;">
+                        <i class="fas fa-clock" style="color: #3182ce;"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-xs text-gray-500">Pending</p>
-                        <p class="text-lg font-bold text-gray-800" x-text="pendingLogs"></p>
-                    </div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Pending</div>
                 </div>
-            </div>
-            
-            <div class="section-card p-4">
-                <div class="flex items-center">
-                    <div class="bg-purple-100 p-2 rounded-lg">
-                        <i class="fas fa-users text-purple-600 text-lg"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #e9d8fd;">
+                        <i class="fas fa-users" style="color: #6b46c1;"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-xs text-gray-500">Clients</p>
-                        <p class="text-lg font-bold text-gray-800" x-text="activeClients"></p>
-                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Clients</div>
                 </div>
             </div>
         </div>
         
-        <!-- Clients Section -->
-        <div x-show="activeTab === 'clients'" class="space-y-6">
-            <!-- Urgent Follow-ups Section -->
-            <div class="urgent-section section-card overflow-hidden" x-show="urgentFollowups.length > 0">
-                <div class="px-4 py-3 border-b border-red-100 bg-red-50 flex items-center justify-between">
-                    <h2 class="hierarchy-1 text-urgent flex items-center">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        Urgent Follow-ups
-                    </h2>
-                    <span class="urgent-badge" x-text="urgentFollowups.length + ' urgent'"></span>
-                </div>
-                
-                <div class="divide-y divide-red-100">
-                    <template x-for="(client, index) in urgentFollowups" :key="index">
-                        <div class="log-entry p-4 hover:bg-red-50">
-                            <div class="flex flex-col">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="hierarchy-1 font-bold" x-text="client.name"></h3>
-                                        <div class="flex items-center text-sm text-gray-500 mt-1">
-                                            <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
-                                            <span x-text="client.location"></span>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-sm text-gray-500" x-text="formatDate(client.lastLogDate)"></div>
-                                        <div class="mt-1">
-                                            <span class="followup-badge">Follow-up Required</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Last Work Summary</h4>
-                                    <p class="hierarchy-3 mt-1 text-gray-600" x-text="client.lastWorkSummary"></p>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
-                                    <div class="mt-1 flex flex-wrap">
-                                        <template x-for="(tech, i) in client.technicians" :key="i">
-                                            <span class="technician-tag">
-                                                <i class="fas fa-user mr-1"></i>
-                                                <span x-text="tech"></span>
-                                            </span>
-                                        </template>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    <button @click="viewClientLogs(client.name)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        <span>View Logs</span>
-                                    </button>
-                                    <button @click="createFollowupLog(client)" class="px-3 py-2 bg-urgent hover:bg-red-700 text-white rounded-lg flex items-center shadow-sm">
-                                        <i class="fas fa-plus mr-1"></i>
-                                        <span>New Follow-up</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
+        <!-- Urgent Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="h3">Urgent Follow-ups</h2>
+                <span class="status-badge status-followup">3 urgent</span>
             </div>
             
-            <!-- Client List -->
-            <div class="section-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                    <h2 class="hierarchy-1">Client List</h2>
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            x-model="clientSearch" 
-                            placeholder="Search clients..." 
-                            class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                        >
-                        <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+            <div class="log-preview">
+                <div class="log-header">
+                    <div class="client-info">
+                        <h3 class="h4">TechCorp Inc.</h3>
+                        <p class="small-text">
+                            <i class="fas fa-map-marker-alt"></i> 123 Business Park
+                        </p>
+                    </div>
+                    <div class="log-meta">
+                        <p class="small-text">Nov 15, 2023</p>
+                        <span class="status-badge status-followup">Follow-up</span>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                    <template x-for="(client, index) in filteredClients" :key="index">
-                        <div class="client-card section-card p-4 hover:bg-orange-50">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="hierarchy-1 font-bold flex items-center">
-                                        <span x-text="client.name"></span>
-                                        <span x-show="client.followups > 0" class="followup-badge ml-2" x-text="client.followups + ' follow-up'"></span>
-                                    </h3>
-                                    <div class="flex items-center text-sm text-gray-500 mt-1">
-                                        <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
-                                        <span x-text="client.location"></span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-sm text-gray-500" x-text="formatDate(client.lastLogDate)"></div>
-                                    <div class="mt-1">
-                                        <span class="text-xs font-medium" :class="{
-                                            'text-green-600': client.lastStatus === 'Completed',
-                                            'text-blue-600': client.lastStatus === 'In Progress',
-                                            'text-yellow-600': client.lastStatus === 'Pending',
-                                            'text-red-600': client.lastStatus === 'Follow-up Required'
-                                        }" x-text="client.lastStatus"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 flex items-center justify-between">
-                                <div>
-                                    <span class="text-sm text-gray-500">Logs:</span>
-                                    <span class="text-sm font-medium ml-1" x-text="client.logCount"></span>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button @click="viewClientLogs(client.name)" class="text-primary hover:text-orange-700">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button @click="createClientLog(client)" class="text-primary hover:text-orange-700">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
+                <div class="log-content">
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-tasks"></i>
+                            <span>Work Summary</span>
                         </div>
-                    </template>
+                        <div class="log-section-content">
+                            Network outage after maintenance. Need to verify router configurations and replace faulty hardware.
+                        </div>
+                    </div>
                     
-                    <div x-show="filteredClients.length === 0" class="col-span-full p-8 text-center">
-                        <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
-                            <i class="fas fa-users text-primary text-2xl"></i>
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-users"></i>
+                            <span>Technicians</span>
                         </div>
-                        <h3 class="hierarchy-1 mt-4 text-gray-700">No clients found</h3>
-                        <p class="hierarchy-3 mt-1 text-gray-500">Create your first client log</p>
-                        <button @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
-                            Create Log
+                        <div>
+                            <span class="technician-tag">
+                                <i class="fas fa-user"></i>
+                                <span>Sarah Johnson</span>
+                            </span>
+                            <span class="technician-tag">
+                                <i class="fas fa-user"></i>
+                                <span>Michael Chen</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="log-actions">
+                        <button class="btn btn-outline view-log-btn" data-log-id="1">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-primary followup-btn" data-client="TechCorp Inc.">
+                            <i class="fas fa-plus"></i> Follow-up
                         </button>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Logs Section -->
-        <div x-show="activeTab === 'logs'" class="space-y-6">
-            <!-- Search and Actions -->
-            <div class="section-card p-4">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                    <div class="relative flex-grow">
-                        <input 
-                            type="text" 
-                            x-model="searchQuery" 
-                            placeholder="Search logs..." 
-                            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary"
-                        >
-                        <i class="fas fa-search text-gray-400 absolute left-3 top-3"></i>
+        <!-- Recent Logs -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="h3">Recent Work Logs</h2>
+                <button class="btn btn-outline">
+                    <i class="fas fa-list"></i> View All
+                </button>
+            </div>
+            
+            <div class="log-preview">
+                <div class="log-header">
+                    <div class="client-info">
+                        <h3 class="h4">Global Finance</h3>
+                        <p class="small-text">
+                            <i class="fas fa-map-marker-alt"></i> 88 Wall Street
+                        </p>
                     </div>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-filter"></i>
-                            <span class="hidden md:inline ml-1">Filter</span>
+                    <div class="log-meta">
+                        <p class="small-text">Today</p>
+                        <span class="status-badge status-completed">Completed</span>
+                    </div>
+                </div>
+                
+                <div class="log-content">
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-tasks"></i>
+                            <span>Work Summary</span>
+                        </div>
+                        <div class="log-section-content">
+                            Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.
+                        </div>
+                    </div>
+                    
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-users"></i>
+                            <span>Technicians</span>
+                        </div>
+                        <div>
+                            <span class="technician-tag">
+                                <i class="fas fa-user"></i>
+                                <span>Michael Chen</span>
+                            </span>
+                            <span class="technician-tag">
+                                <i class="fas fa-user"></i>
+                                <span>James Wilson</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="log-actions">
+                        <button class="btn btn-outline view-log-btn" data-log-id="2">
+                            <i class="fas fa-eye"></i> View
                         </button>
-                        <button class="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-sort"></i>
-                            <span class="hidden md:inline ml-1">Sort</span>
+                        <button class="btn btn-outline pdf-btn" data-log-id="2">
+                            <i class="fas fa-file-pdf"></i> PDF
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Log Entries -->
-            <div class="section-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <h2 class="hierarchy-1">Recent Client Logs</h2>
+            <div class="log-preview">
+                <div class="log-header">
+                    <div class="client-info">
+                        <h3 class="h4">MediCare Clinic</h3>
+                        <p class="small-text">
+                            <i class="fas fa-map-marker-alt"></i> 456 Health Ave
+                        </p>
+                    </div>
+                    <div class="log-meta">
+                        <p class="small-text">Yesterday</p>
+                        <span class="status-badge status-inprogress">In Progress</span>
+                    </div>
                 </div>
                 
-                <div class="divide-y divide-gray-100">
-                    <template x-for="(log, index) in filteredLogs" :key="index">
-                        <div class="log-entry p-4 hover:bg-orange-50">
-                            <div class="flex flex-col">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="hierarchy-1 font-bold" x-text="log.clientName"></h3>
-                                        <div class="flex items-center text-sm text-gray-500 mt-1">
-                                            <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
-                                            <span x-text="log.location"></span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-end">
-                                        <div class="text-sm text-gray-500" x-text="formatDate(log.date)"></div>
-                                        <div class="mt-1">
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
-                                                'bg-green-100 text-green-800': log.status === 'Completed',
-                                                'bg-blue-100 text-blue-800': log.status === 'In Progress',
-                                                'bg-yellow-100 text-yellow-800': log.status === 'Pending',
-                                                'bg-red-100 text-red-800': log.status === 'Follow-up Required'
-                                            }" x-text="log.status"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Work Summary</h4>
-                                    <p class="hierarchy-3 mt-1 text-gray-600" x-text="log.workSummary"></p>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <h4 class="hierarchy-2 font-semibold text-gray-700">Technicians</h4>
-                                    <div class="mt-1 flex flex-wrap">
-                                        <template x-for="(tech, i) in log.technicians" :key="i">
-                                            <span class="technician-tag">
-                                                <i class="fas fa-user mr-1"></i>
-                                                <span x-text="tech"></span>
-                                            </span>
-                                        </template>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    <button @click="viewLog(index)" class="px-3 py-2 bg-primary hover:bg-orange-600 text-white rounded-lg flex items-center shadow-sm">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        <span class="hidden sm:inline">View</span>
-                                    </button>
-                                    <button @click="exportPDF(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
-                                        <i class="fas fa-file-pdf mr-1 text-red-500"></i>
-                                        <span class="hidden sm:inline">PDF</span>
-                                    </button>
-                                    <button @click="exportImage(index)" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center shadow-sm">
-                                        <i class="fas fa-image mr-1 text-blue-500"></i>
-                                        <span class="hidden sm:inline">Image</span>
-                                    </button>
-                                </div>
-                            </div>
+                <div class="log-content">
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-tasks"></i>
+                            <span>Work Summary</span>
                         </div>
-                    </template>
+                        <div class="log-section-content">
+                            Server migration to new hardware. Completed data transfer, pending configuration and testing.
+                        </div>
+                    </div>
                     
-                    <div x-show="filteredLogs.length === 0" class="p-8 text-center">
-                        <div class="mx-auto bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center">
-                            <i class="fas fa-file-alt text-primary text-2xl"></i>
+                    <div class="log-section">
+                        <div class="log-section-title">
+                            <i class="fas fa-users"></i>
+                            <span>Technicians</span>
                         </div>
-                        <h3 class="hierarchy-1 mt-4 text-gray-700">No logs found</h3>
-                        <p class="hierarchy-3 mt-1 text-gray-500" x-text="logs.length === 0 ? 'Create your first log' : 'Try a different search'"></p>
-                        <button x-show="logs.length === 0" @click="showForm = true" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
-                            Create Log
+                        <div>
+                            <span class="technician-tag">
+                                <i class="fas fa-user"></i>
+                                <span>Robert Garcia</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="log-actions">
+                        <button class="btn btn-outline view-log-btn" data-log-id="3">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-outline pdf-btn" data-log-id="3">
+                            <i class="fas fa-file-pdf"></i> PDF
                         </button>
                     </div>
                 </div>
@@ -472,626 +748,411 @@
         </div>
     </main>
     
-    <!-- Log Form Modal -->
-    <div x-show="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="px-4 py-3 bg-gradient-to-r from-primary to-secondary flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-white" x-text="editingIndex !== null ? 'Edit Log' : 'Create New Log'"></h2>
-                <button @click="closeForm()" class="text-white hover:text-orange-200">
-                    <i class="fas fa-times"></i>
+    <!-- Log Detail Modal -->
+    <div id="logModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h3">Work Log Details</h2>
+                <button id="closeModalBtn">
+                    <i class="fas fa-times text-white"></i>
                 </button>
             </div>
             
-            <form @submit.prevent="saveLog" class="p-4 space-y-5">
-                <!-- Client Information -->
-                <div class="section-card p-4">
-                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
-                        <i class="fas fa-building mr-2"></i>Client Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Client Name *</label>
-                            <input type="text" x-model="currentLog.clientName" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Acme Corporation" required>
+            <div class="modal-body">
+                <div class="log-preview">
+                    <div class="log-header">
+                        <div class="client-info">
+                            <h3 class="h4" id="modalClientName">Global Finance</h3>
+                            <p class="small-text" id="modalLocation">
+                                <i class="fas fa-map-marker-alt"></i> 88 Wall Street
+                            </p>
                         </div>
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Location *</label>
-                            <input type="text" x-model="currentLog.location" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="123 Main St, City" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Work Information -->
-                <div class="section-card p-4">
-                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
-                        <i class="fas fa-tasks mr-2"></i>Work Information
-                    </h3>
-                    <div class="mb-4">
-                        <label class="hierarchy-3 block text-gray-700 mb-2">Work Summary *</label>
-                        <textarea x-model="currentLog.workSummary" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Describe the work performed..." required></textarea>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Work Details</label>
-                            <textarea x-model="currentLog.workDetails" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Step-by-step details..."></textarea>
-                        </div>
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Issues & Solutions</label>
-                            <textarea x-model="currentLog.issues" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Any issues and resolutions..."></textarea>
+                        <div class="log-meta">
+                            <p class="small-text" id="modalDate">Today</p>
+                            <span class="status-badge status-completed" id="modalStatus">Completed</span>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
-                        <label class="hierarchy-3 block text-gray-700 mb-2">Recommendations & Notes</label>
-                        <textarea x-model="currentLog.recommendations" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Important recommendations and notes..."></textarea>
-                    </div>
-                </div>
-                
-                <!-- Status & Technicians -->
-                <div class="section-card p-4">
-                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
-                        <i class="fas fa-info-circle mr-2"></i>Log Details
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Status</label>
-                            <select x-model="currentLog.status" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary">
-                                <option>Completed</option>
-                                <option>In Progress</option>
-                                <option>Pending</option>
-                                <option>Follow-up Required</option>
-                            </select>
+                    <div class="log-content">
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-tasks"></i>
+                                <span>Work Summary</span>
+                            </div>
+                            <div class="log-section-content" id="modalSummary">
+                                Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.
+                            </div>
                         </div>
-                        <div>
-                            <label class="hierarchy-3 block text-gray-700 mb-2">Date *</label>
-                            <input type="date" x-model="currentLog.date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" required>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-tools"></i>
+                                <span>Work Details</span>
+                            </div>
+                            <div class="log-section-content" id="modalDetails">
+                                - Replaced legacy firewall with new Cisco ASA 5500-X<br>
+                                - Configured security policies and access rules<br>
+                                - Performed penetration testing using Kali Linux tools<br>
+                                - Verified all security groups and network segmentation
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="hierarchy-3 block text-gray-700 mb-2">Technicians *</label>
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                x-model="techInput" 
-                                @keydown.enter.prevent="addTechnician()"
-                                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" 
-                                placeholder="Enter technician name and press Enter"
-                            >
-                            <button 
-                                type="button" 
-                                @click="addTechnician()" 
-                                class="absolute right-2 top-2 text-primary hover:text-orange-600"
-                            >
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Issues & Solutions</span>
+                            </div>
+                            <div class="log-section-content" id="modalIssues">
+                                - Legacy firewall rules were incompatible with new device<br>
+                                &nbsp;&nbsp;→ Created migration script to convert rules<br>
+                                - Some endpoints had outdated security certificates<br>
+                                &nbsp;&nbsp;→ Updated certificates and verified connections
+                            </div>
                         </div>
-                        <div class="mt-2 flex flex-wrap">
-                            <template x-for="(tech, index) in currentLog.technicians" :key="index">
-                                <div class="technician-tag">
-                                    <span x-text="tech"></span>
-                                    <button type="button" @click="removeTechnician(index)" class="ml-2 text-gray-500 hover:text-gray-700">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </template>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Recommendations</span>
+                            </div>
+                            <div class="log-section-content" id="modalRecommendations">
+                                - Schedule quarterly security audits<br>
+                                - Implement multi-factor authentication for admin accounts<br>
+                                - Update employee security training materials
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Client Signature -->
-                <div class="section-card p-4">
-                    <h3 class="hierarchy-1 font-bold mb-4 text-primary">
-                        <i class="fas fa-signature mr-2"></i>Client Signature
-                    </h3>
-                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                        <canvas x-ref="signaturePad" class="w-full h-32 signature-canvas"></canvas>
-                        <div class="mt-2 flex justify-end">
-                            <button type="button" @click="clearSignature" class="px-3 py-1 text-sm text-red-600 hover:text-red-800">
-                                <i class="fas fa-eraser mr-1"></i>Clear Signature
-                            </button>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-users"></i>
+                                <span>Technicians</span>
+                            </div>
+                            <div id="modalTechnicians">
+                                <span class="technician-tag">
+                                    <i class="fas fa-user"></i>
+                                    <span>Michael Chen</span>
+                                </span>
+                                <span class="technician-tag">
+                                    <i class="fas fa-user"></i>
+                                    <span>James Wilson</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Form Actions -->
-                <div class="pt-2 flex justify-end space-x-3">
-                    <button type="button" @click="closeForm()" class="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600">
-                        Save Log
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- View Log Modal -->
-    <div x-show="viewingIndex !== null" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="px-4 py-3 bg-gradient-to-r from-primary to-secondary flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-white">Work Log Details</h2>
-                <button @click="viewingIndex = null" class="text-white hover:text-orange-200">
-                    <i class="fas fa-times"></i>
-                </button>
             </div>
             
-            <div class="p-4" x-ref="logDetails">
-                <template x-if="viewingIndex !== null">
-                    <div class="space-y-5">
-                        <!-- Client Info -->
-                        <div class="section-card p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="hierarchy-1 font-bold text-gray-800" x-text="logs[viewingIndex].clientName"></h3>
-                                    <div class="flex items-center text-gray-600 mt-1">
-                                        <i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>
-                                        <span x-text="logs[viewingIndex].location"></span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="hierarchy-3 text-gray-700" x-text="formatDate(logs[viewingIndex].date)"></div>
-                                    <div class="mt-2">
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
-                                            'bg-green-100 text-green-800': logs[viewingIndex].status === 'Completed',
-                                            'bg-blue-100 text-blue-800': logs[viewingIndex].status === 'In Progress',
-                                            'bg-yellow-100 text-yellow-800': logs[viewingIndex].status === 'Pending',
-                                            'bg-red-100 text-red-800': logs[viewingIndex].status === 'Follow-up Required'
-                                        }" x-text="logs[viewingIndex].status"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Work Summary -->
-                        <div class="section-card p-4">
-                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Work Summary</h4>
-                            <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].workSummary"></p>
-                        </div>
-                        
-                        <!-- Details & Issues -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="section-card p-4">
-                                <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Work Details</h4>
-                                <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].workDetails || 'No additional details provided'"></p>
-                            </div>
-                            <div class="section-card p-4">
-                                <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Issues & Solutions</h4>
-                                <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].issues || 'No issues reported'"></p>
-                            </div>
-                        </div>
-                        
-                        <!-- Recommendations -->
-                        <div class="section-card p-4">
-                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Recommendations & Key Notes</h4>
-                            <p class="hierarchy-3 text-gray-700 whitespace-pre-line" x-text="logs[viewingIndex].recommendations || 'No recommendations provided'"></p>
-                        </div>
-                        
-                        <!-- Technicians -->
-                        <div class="section-card p-4">
-                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Technicians</h4>
-                            <div class="flex flex-wrap">
-                                <template x-for="(tech, i) in logs[viewingIndex].technicians" :key="i">
-                                    <div class="technician-tag">
-                                        <i class="fas fa-user mr-1"></i>
-                                        <span x-text="tech"></span>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                        
-                        <!-- Signature -->
-                        <div class="section-card p-4">
-                            <h4 class="hierarchy-1 font-bold text-gray-800 mb-3">Client Signature</h4>
-                            <div class="mt-2 flex justify-center">
-                                <img :src="logs[viewingIndex].signature" alt="Client Signature" class="max-w-xs border border-gray-200 p-2 bg-white">
-                            </div>
-                        </div>
-                        
-                        <!-- Actions -->
-                        <div class="flex flex-wrap gap-3">
-                            <button @click="exportPDF(viewingIndex)" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 flex items-center">
-                                <i class="fas fa-file-pdf mr-2"></i>Download PDF
-                            </button>
-                            <button @click="exportImage(viewingIndex)" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center">
-                                <i class="fas fa-image mr-2"></i>Download Image
-                            </button>
-                        </div>
-                    </div>
-                </template>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modalCloseBtn">
+                    Close
+                </button>
+                <button class="btn btn-primary" id="modalPdfBtn">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
             </div>
         </div>
     </div>
     
+    <!-- Follow-up Modal -->
+    <div id="followupModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h3">Schedule Follow-up</h2>
+                <button class="close-followup-btn">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Client</label>
+                    <input type="text" class="form-input" id="followupClient" value="TechCorp Inc." readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reason for Follow-up</label>
+                    <textarea class="form-input" rows="3" placeholder="Describe the reason for follow-up...">Network outage after maintenance. Need to verify router configurations and replace faulty hardware.</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-input">
+                        <option>Urgent (24 hours)</option>
+                        <option>High (3 days)</option>
+                        <option>Medium (1 week)</option>
+                        <option>Low (2 weeks)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Scheduled Date</label>
+                    <input type="date" class="form-input" value="2023-11-20">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Assigned Technician</label>
+                    <select class="form-input">
+                        <option>Sarah Johnson</option>
+                        <option>Michael Chen</option>
+                        <option>Robert Garcia</option>
+                        <option>James Wilson</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline close-followup-btn">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" id="confirmFollowupBtn">
+                    <i class="fas fa-calendar-check"></i> Schedule Follow-up
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Log Modal -->
+    <div id="newLogModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h3">New Work Log</h2>
+                <button class="close-newlog-btn">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Client Name</label>
+                    <input type="text" class="form-input" placeholder="Acme Corporation">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" placeholder="123 Main St, City">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Work Summary</label>
+                    <textarea class="form-input" rows="2" placeholder="Describe the work performed..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Work Details</label>
+                    <textarea class="form-input" rows="3" placeholder="Step-by-step details..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Issues & Solutions</label>
+                    <textarea class="form-input" rows="3" placeholder="Any issues and resolutions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Recommendations</label>
+                    <textarea class="form-input" rows="2" placeholder="Important recommendations and notes..."></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-input">
+                            <option>Completed</option>
+                            <option>In Progress</option>
+                            <option>Pending</option>
+                            <option>Follow-up Required</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" value="2023-11-18">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Technicians</label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            class="form-input pl-10" 
+                            placeholder="Enter technician name"
+                        >
+                        <button class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 flex flex-wrap">
+                        <span class="technician-tag">
+                            <span>Sarah Johnson</span>
+                            <button class="ml-2 text-gray-500">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline close-newlog-btn">
+                    Cancel
+                </button>
+                <button class="btn btn-primary">
+                    Save Log
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Toast -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage">Follow-up scheduled successfully!</span>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="fas fa-home nav-icon"></i>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-file-alt nav-icon"></i>
+            <span class="nav-label">Logs</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-users nav-icon"></i>
+            <span class="nav-label">Clients</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-cog nav-icon"></i>
+            <span class="nav-label">Settings</span>
+        </a>
+    </nav>
+
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('logApp', () => ({
-                showForm: false,
-                viewingIndex: null,
-                editingIndex: null,
-                signaturePad: null,
-                techInput: '',
-                searchQuery: '',
-                clientSearch: '',
-                activeTab: 'logs', // Default to logs tab
-                
-                currentLog: {
-                    clientName: '',
-                    location: '',
-                    workSummary: '',
-                    workDetails: '',
-                    issues: '',
-                    recommendations: '',
-                    status: 'Completed',
-                    technicians: [],
-                    date: new Date().toISOString().split('T')[0],
-                    signature: null
-                },
-                
-                logs: JSON.parse(localStorage.getItem('clientLogs')) || [],
-                
-                init() {
-                    // Initialize signature pad
-                    this.signaturePad = new SignaturePad(this.$refs.signaturePad, {
-                        backgroundColor: 'rgb(255, 255, 255)',
-                        penColor: 'rgb(0, 0, 0)',
-                        minWidth: 1,
-                        maxWidth: 3
-                    });
-                    
-                    // Load technician name from localStorage if exists
-                    if (localStorage.getItem('technicianName')) {
-                        this.currentLog.technicians = [localStorage.getItem('technicianName')];
-                    }
-                    
-                    // Set active tab based on screen size
-                    if (window.innerWidth < 768) {
-                        this.activeTab = 'clients';
-                    }
-                },
-                
-                addTechnician() {
-                    if (this.techInput.trim() !== '') {
-                        this.currentLog.technicians.push(this.techInput.trim());
-                        this.techInput = '';
-                    }
-                },
-                
-                removeTechnician(index) {
-                    this.currentLog.technicians.splice(index, 1);
-                },
-                
-                saveLog() {
-                    // Validate technicians
-                    if (this.currentLog.technicians.length === 0) {
-                        alert('Please add at least one technician');
-                        return;
-                    }
-                    
-                    // Capture signature
-                    if (!this.signaturePad.isEmpty()) {
-                        this.currentLog.signature = this.signaturePad.toDataURL();
-                    }
-                    
-                    // Save technician name for future logs
-                    if (this.currentLog.technicians.length > 0) {
-                        localStorage.setItem('technicianName', this.currentLog.technicians[0]);
-                    }
-                    
-                    if (this.editingIndex !== null) {
-                        // Update existing log
-                        this.logs[this.editingIndex] = {...this.currentLog};
-                    } else {
-                        // Add new log
-                        this.logs.unshift({...this.currentLog});
-                    }
-                    
-                    // Save to localStorage
-                    localStorage.setItem('clientLogs', JSON.stringify(this.logs));
-                    
-                    // Reset form
-                    this.signaturePad.clear();
-                    this.techInput = '';
-                    this.currentLog = {
-                        clientName: '',
-                        location: '',
-                        workSummary: '',
-                        workDetails: '',
-                        issues: '',
-                        recommendations: '',
-                        status: 'Completed',
-                        technicians: localStorage.getItem('technicianName') ? [localStorage.getItem('technicianName')] : [],
-                        date: new Date().toISOString().split('T')[0],
-                        signature: null
-                    };
-                    
-                    this.showForm = false;
-                    this.editingIndex = null;
-                },
-                
-                viewLog(index) {
-                    this.viewingIndex = index;
-                },
-                
-                clearSignature() {
-                    this.signaturePad.clear();
-                },
-                
-                closeForm() {
-                    this.showForm = false;
-                    this.editingIndex = null;
-                    this.signaturePad.clear();
-                    this.techInput = '';
-                },
-                
-                formatDate(dateString) {
-                    return moment(dateString).format('MMM D, YYYY');
-                },
-                
-                exportPDF(index) {
-                    const log = this.logs[index];
-                    const doc = new jspdf.jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: 'a4'
-                    });
-                    
-                    // Add WiredWise header
-                    doc.setFillColor(241, 100, 17);
-                    doc.rect(0, 0, 210, 20, 'F');
-                    
-                    doc.setFontSize(16);
-                    doc.setTextColor(255, 255, 255);
-                    doc.text('WiredWise Client Work Log', 105, 12, { align: 'center' });
-                    
-                    // Add content
-                    doc.setFontSize(12);
-                    doc.setTextColor(100);
-                    doc.text(`Date: ${this.formatDate(log.date)}`, 20, 30);
-                    doc.text(`Status: ${log.status}`, 170, 30, { align: 'right' });
-                    
-                    doc.setFontSize(14);
-                    doc.setTextColor(0);
-                    doc.text(`Client: ${log.clientName}`, 20, 40);
-                    doc.text(`Location: ${log.location}`, 20, 50);
-                    
-                    // Technicians
-                    doc.text(`Technicians: ${log.technicians.join(', ')}`, 20, 60);
-                    
-                    // Work Summary
-                    doc.setFontSize(12);
-                    doc.text('Work Summary:', 20, 70);
-                    doc.setFontSize(11);
-                    const splitSummary = doc.splitTextToSize(log.workSummary, 170);
-                    doc.text(splitSummary, 20, 75);
-                    
-                    let yPosition = 75 + (splitSummary.length * 5);
-                    
-                    // Work Details
-                    if (log.workDetails) {
-                        doc.setFontSize(12);
-                        doc.text('Work Details:', 20, yPosition + 5);
-                        doc.setFontSize(11);
-                        const splitDetails = doc.splitTextToSize(log.workDetails, 170);
-                        doc.text(splitDetails, 20, yPosition + 10);
-                        yPosition += 10 + (splitDetails.length * 5);
-                    }
-                    
-                    // Issues
-                    if (log.issues) {
-                        doc.setFontSize(12);
-                        doc.text('Issues & Solutions:', 20, yPosition + 5);
-                        doc.setFontSize(11);
-                        const splitIssues = doc.splitTextToSize(log.issues, 170);
-                        doc.text(splitIssues, 20, yPosition + 10);
-                        yPosition += 10 + (splitIssues.length * 5);
-                    }
-                    
-                    // Recommendations
-                    if (log.recommendations) {
-                        doc.setFontSize(12);
-                        doc.text('Recommendations & Notes:', 20, yPosition + 5);
-                        doc.setFontSize(11);
-                        const splitRecs = doc.splitTextToSize(log.recommendations, 170);
-                        doc.text(splitRecs, 20, yPosition + 10);
-                        yPosition += 10 + (splitRecs.length * 5);
-                    }
-                    
-                    // Signature
-                    if (log.signature) {
-                        const signatureImg = new Image();
-                        signatureImg.src = log.signature;
-                        
-                        signatureImg.onload = () => {
-                            doc.addImage(signatureImg, 'PNG', 20, yPosition + 15, 60, 20);
-                            doc.text('Client Signature:', 20, yPosition + 40);
-                            
-                            // Add footer
-                            doc.setFontSize(10);
-                            doc.setTextColor(100);
-                            doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
-                            
-                            doc.save(`wiredwise-log-${log.clientName}-${log.date}.pdf`);
-                        };
-                    } else {
-                        // Add footer
-                        doc.setFontSize(10);
-                        doc.setTextColor(100);
-                        doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
-                        
-                        doc.save(`wiredwise-log-${log.clientName}-${log.date}.pdf`);
-                    }
-                },
-                
-                exportImage(index) {
-                    this.viewingIndex = index;
-                    
-                    setTimeout(() => {
-                        html2canvas(this.$refs.logDetails).then(canvas => {
-                            const imgData = canvas.toDataURL('image/png');
-                            const link = document.createElement('a');
-                            link.href = imgData;
-                            link.download = `wiredwise-log-${this.logs[index].clientName}-${this.logs[index].date}.png`;
-                            link.click();
-                        });
-                    }, 500);
-                },
-                
-                exportAllPDF() {
-                    if (this.logs.length === 0) return;
-                    
-                    const doc = new jspdf.jsPDF();
-                    
-                    this.logs.forEach((log, index) => {
-                        if (index > 0) doc.addPage();
-                        
-                        // Add WiredWise header
-                        doc.setFillColor(241, 100, 17);
-                        doc.rect(0, 0, 210, 20, 'F');
-                        
-                        doc.setFontSize(16);
-                        doc.setTextColor(255, 255, 255);
-                        doc.text('WiredWise Client Work Log', 105, 12, { align: 'center' });
-                        
-                        // Client info
-                        doc.setFontSize(12);
-                        doc.setTextColor(100);
-                        doc.text(`Date: ${this.formatDate(log.date)}`, 20, 30);
-                        doc.text(`Status: ${log.status}`, 170, 30, { align: 'right' });
-                        
-                        doc.setFontSize(14);
-                        doc.setTextColor(0);
-                        doc.text(`Client: ${log.clientName}`, 20, 40);
-                        doc.text(`Location: ${log.location}`, 20, 50);
-                        
-                        // Work Summary
-                        doc.setFontSize(12);
-                        doc.text('Work Summary:', 20, 60);
-                        doc.setFontSize(11);
-                        const splitSummary = doc.splitTextToSize(log.workSummary, 170);
-                        doc.text(splitSummary, 20, 65);
-                        
-                        let yPosition = 65 + (splitSummary.length * 5);
-                        
-                        // Recommendations
-                        if (log.recommendations) {
-                            doc.setFontSize(12);
-                            doc.text('Recommendations:', 20, yPosition + 5);
-                            doc.setFontSize(11);
-                            const splitRecs = doc.splitTextToSize(log.recommendations, 170);
-                            doc.text(splitRecs, 20, yPosition + 10);
-                            yPosition += 10 + (splitRecs.length * 5);
-                        }
-                        
-                        // Technicians
-                        doc.setFontSize(12);
-                        doc.text(`Technicians: ${log.technicians.join(', ')}`, 20, yPosition + 15);
-                        
-                        // Add footer
-                        doc.setFontSize(10);
-                        doc.setTextColor(100);
-                        doc.text('WiredWise - Professional IT Solutions', 105, 290, { align: 'center' });
-                    });
-                    
-                    doc.save('wiredwise-all-logs.pdf');
-                },
-                
-                viewClientLogs(clientName) {
-                    this.clientSearch = clientName;
-                    this.activeTab = 'logs';
-                    this.searchQuery = clientName;
-                },
-                
-                createClientLog(client) {
-                    this.showForm = true;
-                    this.currentLog.clientName = client.name;
-                    this.currentLog.location = client.location;
-                },
-                
-                createFollowupLog(client) {
-                    this.showForm = true;
-                    this.currentLog.clientName = client.name;
-                    this.currentLog.location = client.location;
-                    this.currentLog.status = 'Follow-up Required';
-                },
-                
-                get filteredLogs() {
-                    if (!this.searchQuery) return this.logs;
-                    const query = this.searchQuery.toLowerCase();
-                    return this.logs.filter(log => 
-                        log.clientName.toLowerCase().includes(query) || 
-                        log.location.toLowerCase().includes(query) ||
-                        log.workSummary.toLowerCase().includes(query) ||
-                        log.technicians.some(tech => tech.toLowerCase().includes(query))
-                    );
-                },
-                
-                get completedLogs() {
-                    return this.logs.filter(log => log.status === 'Completed').length;
-                },
-                
-                get pendingLogs() {
-                    return this.logs.filter(log => log.status === 'Follow-up Required' || log.status === 'Pending').length;
-                },
-                
-                get activeClients() {
-                    const clientNames = this.logs.map(log => log.clientName);
-                    const uniqueClients = new Set(clientNames);
-                    return uniqueClients.size;
-                },
-                
-                get clients() {
-                    const clientsMap = new Map();
-                    
-                    this.logs.forEach(log => {
-                        if (!clientsMap.has(log.clientName)) {
-                            clientsMap.set(log.clientName, {
-                                name: log.clientName,
-                                location: log.location,
-                                lastLogDate: log.date,
-                                lastStatus: log.status,
-                                lastWorkSummary: log.workSummary,
-                                technicians: [...new Set(log.technicians)], // Unique technicians
-                                logCount: 0,
-                                followups: 0
-                            });
-                        }
-                        
-                        const client = clientsMap.get(log.clientName);
-                        client.logCount++;
-                        
-                        // Update if this log is more recent
-                        if (new Date(log.date) > new Date(client.lastLogDate)) {
-                            client.lastLogDate = log.date;
-                            client.lastStatus = log.status;
-                            client.lastWorkSummary = log.workSummary;
-                        }
-                        
-                        // Count follow-up required logs
-                        if (log.status === 'Follow-up Required') {
-                            client.followups++;
-                        }
-                    });
-                    
-                    return Array.from(clientsMap.values());
-                },
-                
-                get filteredClients() {
-                    if (!this.clientSearch) return this.clients;
-                    const query = this.clientSearch.toLowerCase();
-                    return this.clients.filter(client => 
-                        client.name.toLowerCase().includes(query) || 
-                        client.location.toLowerCase().includes(query)
-                    );
-                },
-                
-                get urgentFollowups() {
-                    return this.clients.filter(client => 
-                        client.lastStatus === 'Follow-up Required'
-                    ).sort((a, b) => new Date(b.lastLogDate) - new Date(a.lastLogDate));
+        // DOM Elements
+        const logModal = document.getElementById('logModal');
+        const followupModal = document.getElementById('followupModal');
+        const newLogModal = document.getElementById('newLogModal');
+        const toast = document.getElementById('toast');
+        
+        // Buttons
+        const newLogBtn = document.getElementById('newLogBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const viewLogBtns = document.querySelectorAll('.view-log-btn');
+        const followupBtns = document.querySelectorAll('.followup-btn');
+        const pdfBtns = document.querySelectorAll('.pdf-btn');
+        const modalPdfBtn = document.getElementById('modalPdfBtn');
+        const confirmFollowupBtn = document.getElementById('confirmFollowupBtn');
+        
+        // Modal open/close functions
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function closeAllModals() {
+            closeModal(logModal);
+            closeModal(followupModal);
+            closeModal(newLogModal);
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Generate PDF function
+        function generatePDF(logId) {
+            // In a real app, this would generate a PDF from log data
+            showToast(`Generated PDF for log #${logId}`);
+        }
+        
+        // Event Listeners
+        newLogBtn.addEventListener('click', () => openModal(newLogModal));
+        
+        // Close buttons
+        document.querySelectorAll('.close-newlog-btn, .close-followup-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (newLogModal.classList.contains('hidden')) {
+                    closeModal(followupModal);
+                } else {
+                    closeModal(newLogModal);
                 }
-            }));
+            });
+        });
+        
+        closeModalBtn.addEventListener('click', () => closeModal(logModal));
+        modalCloseBtn.addEventListener('click', () => closeModal(logModal));
+        
+        // View log buttons
+        viewLogBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const logId = btn.getAttribute('data-log-id');
+                // In a real app, this would load data for the specific log
+                openModal(logModal);
+            });
+        });
+        
+        // Follow-up buttons
+        followupBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const client = btn.getAttribute('data-client');
+                document.getElementById('followupClient').value = client;
+                openModal(followupModal);
+            });
+        });
+        
+        // PDF buttons
+        pdfBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const logId = btn.getAttribute('data-log-id');
+                generatePDF(logId);
+            });
+        });
+        
+        modalPdfBtn.addEventListener('click', () => {
+            generatePDF('current');
+        });
+        
+        // Confirm follow-up
+        confirmFollowupBtn.addEventListener('click', () => {
+            closeModal(followupModal);
+            showToast('Follow-up scheduled successfully!');
+        });
+        
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeModal(overlay);
+                }
+            });
+        });
+        
+        // Bottom nav active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
     </script>
 </body>
