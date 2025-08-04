@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiredWise - Mobile Work Logger</title>
+    <title>WiredWise - Complete Work Logger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <style>
@@ -812,6 +812,19 @@
                         
                         <div class="log-section">
                             <div class="log-section-title">
+                                <i class="fas fa-box"></i>
+                                <span>Items Used</span>
+                            </div>
+                            <div class="log-section-content" id="modalItems">
+                                - Cisco ASA 5500-X Firewall<br>
+                                - Console cables<br>
+                                - Rack mounting kit<br>
+                                - Network testing tools
+                            </div>
+                        </div>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
                                 <i class="fas fa-lightbulb"></i>
                                 <span>Recommendations</span>
                             </div>
@@ -846,7 +859,7 @@
                 <button class="btn btn-outline" id="modalCloseBtn">
                     Close
                 </button>
-                <button class="btn btn-primary" id="modalPdfBtn">
+                <button class="btn btn-primary" id="modalPdfBtn" data-log-id="2">
                     <i class="fas fa-file-pdf"></i> Download PDF
                 </button>
             </div>
@@ -924,38 +937,43 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label class="form-label">Client Name</label>
-                    <input type="text" class="form-input" placeholder="Acme Corporation">
+                    <input type="text" class="form-input" id="clientName" placeholder="Acme Corporation">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Location</label>
-                    <input type="text" class="form-input" placeholder="123 Main St, City">
+                    <input type="text" class="form-input" id="location" placeholder="123 Main St, City">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Work Summary</label>
-                    <textarea class="form-input" rows="2" placeholder="Describe the work performed..."></textarea>
+                    <textarea class="form-input" id="workSummary" rows="2" placeholder="Describe the work performed..."></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Work Details</label>
-                    <textarea class="form-input" rows="3" placeholder="Step-by-step details..."></textarea>
+                    <textarea class="form-input" id="workDetails" rows="3" placeholder="Step-by-step details..."></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Issues & Solutions</label>
-                    <textarea class="form-input" rows="3" placeholder="Any issues and resolutions..."></textarea>
+                    <textarea class="form-input" id="issues" rows="3" placeholder="Any issues and resolutions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Items Used</label>
+                    <textarea class="form-input" id="itemsUsed" rows="2" placeholder="List items used in this work..."></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Recommendations</label>
-                    <textarea class="form-input" rows="2" placeholder="Important recommendations and notes..."></textarea>
+                    <textarea class="form-input" id="recommendations" rows="2" placeholder="Important recommendations and notes..."></textarea>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
                         <label class="form-label">Status</label>
-                        <select class="form-input">
+                        <select class="form-input" id="status">
                             <option>Completed</option>
                             <option>In Progress</option>
                             <option>Pending</option>
@@ -965,7 +983,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">Date</label>
-                        <input type="date" class="form-input" value="2023-11-18">
+                        <input type="date" class="form-input" id="date" value="2023-11-18">
                     </div>
                 </div>
                 
@@ -974,23 +992,16 @@
                     <div class="relative">
                         <input 
                             type="text" 
-                            class="form-input pl-10" 
+                            class="form-input" 
+                            id="techInput"
                             placeholder="Enter technician name"
                         >
-                        <button class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                        <button id="addTechBtn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <div class="mt-2 flex flex-wrap">
-                        <span class="technician-tag">
-                            <span>Sarah Johnson</span>
-                            <button class="ml-2 text-gray-500">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </span>
+                    <div id="techList" class="mt-2 flex flex-wrap">
+                        <!-- Technicians will be added here -->
                     </div>
                 </div>
             </div>
@@ -999,7 +1010,7 @@
                 <button class="btn btn-outline close-newlog-btn">
                     Cancel
                 </button>
-                <button class="btn btn-primary">
+                <button class="btn btn-primary" id="saveLogBtn">
                     Save Log
                 </button>
             </div>
@@ -1050,6 +1061,55 @@
         const pdfBtns = document.querySelectorAll('.pdf-btn');
         const modalPdfBtn = document.getElementById('modalPdfBtn');
         const confirmFollowupBtn = document.getElementById('confirmFollowupBtn');
+        const addTechBtn = document.getElementById('addTechBtn');
+        const saveLogBtn = document.getElementById('saveLogBtn');
+        const techList = document.getElementById('techList');
+        
+        // Technician array
+        let technicians = [];
+        
+        // Sample logs data
+        const logs = [
+            {
+                id: 1,
+                clientName: "TechCorp Inc.",
+                location: "123 Business Park",
+                workSummary: "Network outage after maintenance. Need to verify router configurations and replace faulty hardware.",
+                workDetails: "Checked router configurations and found misconfigurations. Replaced faulty router module.",
+                issues: "Router module was damaged during maintenance.",
+                itemsUsed: "Router module X-200, Cisco console cable, Rack screws",
+                recommendations: "Schedule hardware maintenance checks quarterly.",
+                status: "Follow-up Required",
+                date: "2023-11-15",
+                technicians: ["Sarah Johnson", "Michael Chen"]
+            },
+            {
+                id: 2,
+                clientName: "Global Finance",
+                location: "88 Wall Street",
+                workSummary: "Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.",
+                workDetails: "- Replaced legacy firewall with new Cisco ASA 5500-X\n- Configured security policies and access rules\n- Performed penetration testing using Kali Linux tools\n- Verified all security groups and network segmentation",
+                issues: "- Legacy firewall rules were incompatible with new device\n  → Created migration script to convert rules\n- Some endpoints had outdated security certificates\n  → Updated certificates and verified connections",
+                itemsUsed: "Cisco ASA 5500-X Firewall, Console cables, Rack mounting kit, Network testing tools",
+                recommendations: "- Schedule quarterly security audits\n- Implement multi-factor authentication for admin accounts\n- Update employee security training materials",
+                status: "Completed",
+                date: "2023-11-18",
+                technicians: ["Michael Chen", "James Wilson"]
+            },
+            {
+                id: 3,
+                clientName: "MediCare Clinic",
+                location: "456 Health Ave",
+                workSummary: "Server migration to new hardware. Completed data transfer, pending configuration and testing.",
+                workDetails: "- Set up new server hardware\n- Migrated data from old server\n- Configured network settings\n- Tested basic functionality",
+                issues: "- Old server had incompatible RAID configuration\n  → Created custom migration script\n- Network switch needed firmware update",
+                itemsUsed: "Dell PowerEdge R750 Server, Ethernet cables, Rack rails, KVM switch",
+                recommendations: "- Schedule full system test next week\n- Implement backup verification process",
+                status: "In Progress",
+                date: "2023-11-17",
+                technicians: ["Robert Garcia"]
+            }
+        ];
         
         // Modal open/close functions
         function openModal(modal) {
@@ -1079,23 +1139,222 @@
         }
         
         // Generate PDF function
-        function generatePDF(logId) {
-            // In a real app, this would generate a PDF from log data
-            showToast(`Generated PDF for log #${logId}`);
+        function generatePDF(log) {
+            // Create a new jsPDF instance
+            const doc = new jspdf.jsPDF();
+            
+            // Add header
+            doc.setFillColor(241, 100, 17);
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text('WiredWise Work Log', 105, 12, { align: 'center' });
+            
+            // Client info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.text(`Client: ${log.clientName}`, 20, 30);
+            doc.text(`Location: ${log.location}`, 20, 40);
+            doc.text(`Date: ${log.date}`, 20, 50);
+            
+            // Status
+            doc.setFontSize(14);
+            doc.text('Status:', 140, 30);
+            doc.setFontSize(12);
+            doc.text(log.status, 140, 40);
+            
+            // Work summary
+            doc.setFontSize(14);
+            doc.text('Work Summary:', 20, 65);
+            doc.setFontSize(12);
+            doc.text(log.workSummary, 20, 75, { maxWidth: 170 });
+            
+            // Work details
+            doc.setFontSize(14);
+            doc.text('Work Details:', 20, 95);
+            doc.setFontSize(12);
+            doc.text(log.workDetails, 20, 105, { maxWidth: 170 });
+            
+            // Issues & Solutions
+            doc.setFontSize(14);
+            doc.text('Issues & Solutions:', 20, 130);
+            doc.setFontSize(12);
+            doc.text(log.issues, 20, 140, { maxWidth: 170 });
+            
+            // Items Used
+            doc.setFontSize(14);
+            doc.text('Items Used:', 20, 165);
+            doc.setFontSize(12);
+            doc.text(log.itemsUsed, 20, 175, { maxWidth: 170 });
+            
+            // Recommendations
+            doc.setFontSize(14);
+            doc.text('Recommendations:', 20, 195);
+            doc.setFontSize(12);
+            doc.text(log.recommendations, 20, 205, { maxWidth: 170 });
+            
+            // Technicians
+            doc.setFontSize(14);
+            doc.text('Technicians:', 20, 230);
+            doc.setFontSize(12);
+            let yPos = 240;
+            log.technicians.forEach(tech => {
+                doc.text(`• ${tech}`, 25, yPos);
+                yPos += 7;
+            });
+            
+            // Footer
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text('Generated by WiredWise Work Logger', 105, 290, { align: 'center' });
+            
+            // Save the PDF
+            const filename = `${log.clientName.replace(/\s+/g, '_')}_Work_Log.pdf`;
+            doc.save(filename);
+            showToast(`PDF downloaded: ${filename}`);
+        }
+        
+        // Add technician function
+        function addTechnician() {
+            const techInput = document.getElementById('techInput');
+            const name = techInput.value.trim();
+            
+            if (name) {
+                technicians.push(name);
+                renderTechnicians();
+                techInput.value = '';
+            }
+        }
+        
+        // Remove technician function
+        function removeTechnician(index) {
+            technicians.splice(index, 1);
+            renderTechnicians();
+        }
+        
+        // Render technicians list
+        function renderTechnicians() {
+            techList.innerHTML = '';
+            technicians.forEach((tech, index) => {
+                const tag = document.createElement('span');
+                tag.className = 'technician-tag';
+                tag.innerHTML = `
+                    <span>${tech}</span>
+                    <button class="ml-2 text-gray-500 remove-tech" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                techList.appendChild(tag);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-tech').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.getAttribute('data-index');
+                    removeTechnician(parseInt(index));
+                });
+            });
+        }
+        
+        // Save log function
+        function saveLog() {
+            const clientName = document.getElementById('clientName').value;
+            const location = document.getElementById('location').value;
+            const workSummary = document.getElementById('workSummary').value;
+            const workDetails = document.getElementById('workDetails').value;
+            const issues = document.getElementById('issues').value;
+            const itemsUsed = document.getElementById('itemsUsed').value;
+            const recommendations = document.getElementById('recommendations').value;
+            const status = document.getElementById('status').value;
+            const date = document.getElementById('date').value;
+            
+            if (!clientName || !workSummary || !date) {
+                showToast('Please fill in all required fields');
+                return;
+            }
+            
+            // Create log object
+            const newLog = {
+                id: Date.now(),
+                clientName,
+                location,
+                workSummary,
+                workDetails,
+                issues,
+                itemsUsed,
+                recommendations,
+                status,
+                date,
+                technicians: [...technicians]
+            };
+            
+            // Add to logs array
+            logs.push(newLog);
+            
+            // Show success message
+            showToast(`Log created for ${clientName}`);
+            
+            // Reset form
+            document.getElementById('clientName').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('workSummary').value = '';
+            document.getElementById('workDetails').value = '';
+            document.getElementById('issues').value = '';
+            document.getElementById('itemsUsed').value = '';
+            document.getElementById('recommendations').value = '';
+            document.getElementById('status').value = 'Completed';
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            technicians = [];
+            renderTechnicians();
+            
+            // Close modal
+            closeModal(newLogModal);
+        }
+        
+        // Set modal content for log details
+        function setLogModalContent(log) {
+            document.getElementById('modalClientName').textContent = log.clientName;
+            document.getElementById('modalLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${log.location}`;
+            document.getElementById('modalDate').textContent = log.date;
+            document.getElementById('modalStatus').textContent = log.status;
+            document.getElementById('modalStatus').className = `status-badge ${
+                log.status === 'Completed' ? 'status-completed' : 
+                log.status === 'In Progress' ? 'status-inprogress' : 
+                log.status === 'Follow-up Required' ? 'status-followup' : 'status-pending'
+            }`;
+            document.getElementById('modalSummary').textContent = log.workSummary;
+            document.getElementById('modalDetails').innerHTML = log.workDetails.replace(/\n/g, '<br>');
+            document.getElementById('modalIssues').innerHTML = log.issues.replace(/\n/g, '<br>');
+            document.getElementById('modalItems').innerHTML = log.itemsUsed.replace(/\n/g, '<br>');
+            document.getElementById('modalRecommendations').innerHTML = log.recommendations.replace(/\n/g, '<br>');
+            
+            // Set technicians
+            const techContainer = document.getElementById('modalTechnicians');
+            techContainer.innerHTML = '';
+            log.technicians.forEach(tech => {
+                const tag = document.createElement('span');
+                tag.className = 'technician-tag';
+                tag.innerHTML = `
+                    <i class="fas fa-user"></i>
+                    <span>${tech}</span>
+                `;
+                techContainer.appendChild(tag);
+            });
+            
+            // Set PDF button data
+            modalPdfBtn.setAttribute('data-log-id', log.id);
         }
         
         // Event Listeners
         newLogBtn.addEventListener('click', () => openModal(newLogModal));
         
         // Close buttons
-        document.querySelectorAll('.close-newlog-btn, .close-followup-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (newLogModal.classList.contains('hidden')) {
-                    closeModal(followupModal);
-                } else {
-                    closeModal(newLogModal);
-                }
-            });
+        document.querySelectorAll('.close-newlog-btn').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(newLogModal));
+        });
+        
+        document.querySelectorAll('.close-followup-btn').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(followupModal));
         });
         
         closeModalBtn.addEventListener('click', () => closeModal(logModal));
@@ -1105,8 +1364,11 @@
         viewLogBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const logId = btn.getAttribute('data-log-id');
-                // In a real app, this would load data for the specific log
-                openModal(logModal);
+                const log = logs.find(l => l.id == logId);
+                if (log) {
+                    setLogModalContent(log);
+                    openModal(logModal);
+                }
             });
         });
         
@@ -1123,18 +1385,47 @@
         pdfBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const logId = btn.getAttribute('data-log-id');
-                generatePDF(logId);
+                const log = logs.find(l => l.id == logId);
+                if (log) {
+                    generatePDF(log);
+                }
             });
         });
         
         modalPdfBtn.addEventListener('click', () => {
-            generatePDF('current');
+            const logId = modalPdfBtn.getAttribute('data-log-id');
+            const log = logs.find(l => l.id == logId);
+            if (log) {
+                generatePDF(log);
+            }
         });
         
         // Confirm follow-up
         confirmFollowupBtn.addEventListener('click', () => {
             closeModal(followupModal);
             showToast('Follow-up scheduled successfully!');
+        });
+        
+        // Add technician
+        addTechBtn.addEventListener('click', addTechnician);
+        
+        // Save log
+        saveLogBtn.addEventListener('click', saveLog);
+        
+        // Also add technician when pressing Enter in tech input
+        document.getElementById('techInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTechnician();
+            }
+        });
+        
+        // Bottom nav active state
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
         
         // Close modals when clicking outside
@@ -1146,14 +1437,8 @@
             });
         });
         
-        // Bottom nav active state
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // Initialize technicians list
+        renderTechnicians();
     </script>
 </body>
 </html>
