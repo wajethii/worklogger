@@ -493,6 +493,23 @@
             color: var(--gray-500);
         }
         
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+        
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+        
         /* Responsive adjustments */
         @media (min-width: 768px) {
             .bottom-nav {
@@ -544,7 +561,7 @@
                     <div class="stat-icon" style="background-color: #fdf0e8;">
                         <i class="fas fa-file-alt" style="color: var(--primary);"></i>
                     </div>
-                    <div class="stat-value">24</div>
+                    <div class="stat-value" id="totalLogs">0</div>
                     <div class="stat-label">Total Logs</div>
                 </div>
                 
@@ -552,7 +569,7 @@
                     <div class="stat-icon" style="background-color: #def7ec;">
                         <i class="fas fa-check-circle" style="color: var(--success);"></i>
                     </div>
-                    <div class="stat-value">18</div>
+                    <div class="stat-value" id="completedLogs">0</div>
                     <div class="stat-label">Completed</div>
                 </div>
                 
@@ -560,7 +577,7 @@
                     <div class="stat-icon" style="background-color: #ebf8ff;">
                         <i class="fas fa-clock" style="color: #3182ce;"></i>
                     </div>
-                    <div class="stat-value">5</div>
+                    <div class="stat-value" id="pendingLogs">0</div>
                     <div class="stat-label">Pending</div>
                 </div>
                 
@@ -568,7 +585,7 @@
                     <div class="stat-icon" style="background-color: #e9d8fd;">
                         <i class="fas fa-users" style="color: #6b46c1;"></i>
                     </div>
-                    <div class="stat-value">12</div>
+                    <div class="stat-value" id="totalClients">0</div>
                     <div class="stat-label">Clients</div>
                 </div>
             </div>
@@ -578,59 +595,14 @@
         <div class="section">
             <div class="section-header">
                 <h2 class="h3">Urgent Follow-ups</h2>
-                <span class="status-badge status-followup">3 urgent</span>
+                <span class="status-badge status-followup" id="urgentCount">0 urgent</span>
             </div>
             
-            <div class="log-preview">
-                <div class="log-header">
-                    <div class="client-info">
-                        <h3 class="h4">TechCorp Inc.</h3>
-                        <p class="small-text">
-                            <i class="fas fa-map-marker-alt"></i> 123 Business Park
-                        </p>
-                    </div>
-                    <div class="log-meta">
-                        <p class="small-text">Nov 15, 2023</p>
-                        <span class="status-badge status-followup">Follow-up</span>
-                    </div>
-                </div>
-                
-                <div class="log-content">
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-tasks"></i>
-                            <span>Work Summary</span>
-                        </div>
-                        <div class="log-section-content">
-                            Network outage after maintenance. Need to verify router configurations and replace faulty hardware.
-                        </div>
-                    </div>
-                    
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-users"></i>
-                            <span>Technicians</span>
-                        </div>
-                        <div>
-                            <span class="technician-tag">
-                                <i class="fas fa-user"></i>
-                                <span>Sarah Johnson</span>
-                            </span>
-                            <span class="technician-tag">
-                                <i class="fas fa-user"></i>
-                                <span>Michael Chen</span>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="log-actions">
-                        <button class="btn btn-outline view-log-btn" data-log-id="1">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-primary followup-btn" data-client="TechCorp Inc.">
-                            <i class="fas fa-plus"></i> Follow-up
-                        </button>
-                    </div>
+            <div id="urgentLogsContainer">
+                <!-- Urgent logs will be inserted here -->
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>No urgent follow-ups</p>
                 </div>
             </div>
         </div>
@@ -639,110 +611,19 @@
         <div class="section">
             <div class="section-header">
                 <h2 class="h3">Recent Work Logs</h2>
-                <button class="btn btn-outline">
+                <button class="btn btn-outline" id="viewAllBtn" disabled>
                     <i class="fas fa-list"></i> View All
                 </button>
             </div>
             
-            <div class="log-preview">
-                <div class="log-header">
-                    <div class="client-info">
-                        <h3 class="h4">Global Finance</h3>
-                        <p class="small-text">
-                            <i class="fas fa-map-marker-alt"></i> 88 Wall Street
-                        </p>
-                    </div>
-                    <div class="log-meta">
-                        <p class="small-text">Today</p>
-                        <span class="status-badge status-completed">Completed</span>
-                    </div>
-                </div>
-                
-                <div class="log-content">
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-tasks"></i>
-                            <span>Work Summary</span>
-                        </div>
-                        <div class="log-section-content">
-                            Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.
-                        </div>
-                    </div>
-                    
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-users"></i>
-                            <span>Technicians</span>
-                        </div>
-                        <div>
-                            <span class="technician-tag">
-                                <i class="fas fa-user"></i>
-                                <span>Michael Chen</span>
-                            </span>
-                            <span class="technician-tag">
-                                <i class="fas fa-user"></i>
-                                <span>James Wilson</span>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="log-actions">
-                        <button class="btn btn-outline view-log-btn" data-log-id="2">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-outline pdf-btn" data-log-id="2">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="log-preview">
-                <div class="log-header">
-                    <div class="client-info">
-                        <h3 class="h4">MediCare Clinic</h3>
-                        <p class="small-text">
-                            <i class="fas fa-map-marker-alt"></i> 456 Health Ave
-                        </p>
-                    </div>
-                    <div class="log-meta">
-                        <p class="small-text">Yesterday</p>
-                        <span class="status-badge status-inprogress">In Progress</span>
-                    </div>
-                </div>
-                
-                <div class="log-content">
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-tasks"></i>
-                            <span>Work Summary</span>
-                        </div>
-                        <div class="log-section-content">
-                            Server migration to new hardware. Completed data transfer, pending configuration and testing.
-                        </div>
-                    </div>
-                    
-                    <div class="log-section">
-                        <div class="log-section-title">
-                            <i class="fas fa-users"></i>
-                            <span>Technicians</span>
-                        </div>
-                        <div>
-                            <span class="technician-tag">
-                                <i class="fas fa-user"></i>
-                                <span>Robert Garcia</span>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="log-actions">
-                        <button class="btn btn-outline view-log-btn" data-log-id="3">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-outline pdf-btn" data-log-id="3">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                    </div>
+            <div id="recentLogsContainer">
+                <!-- Recent logs will be inserted here -->
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <p>No work logs yet</p>
+                    <button class="btn btn-primary" id="createFirstLogBtn">
+                        <i class="fas fa-plus"></i> Create Your First Log
+                    </button>
                 </div>
             </div>
         </div>
@@ -762,14 +643,14 @@
                 <div class="log-preview">
                     <div class="log-header">
                         <div class="client-info">
-                            <h3 class="h4" id="modalClientName">Global Finance</h3>
+                            <h3 class="h4" id="modalClientName"></h3>
                             <p class="small-text" id="modalLocation">
-                                <i class="fas fa-map-marker-alt"></i> 88 Wall Street
+                                <i class="fas fa-map-marker-alt"></i> <span id="modalLocationText"></span>
                             </p>
                         </div>
                         <div class="log-meta">
-                            <p class="small-text" id="modalDate">Today</p>
-                            <span class="status-badge status-completed" id="modalStatus">Completed</span>
+                            <p class="small-text" id="modalDate"></p>
+                            <span class="status-badge" id="modalStatus"></span>
                         </div>
                     </div>
                     
@@ -779,9 +660,7 @@
                                 <i class="fas fa-tasks"></i>
                                 <span>Work Summary</span>
                             </div>
-                            <div class="log-section-content" id="modalSummary">
-                                Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.
-                            </div>
+                            <div class="log-section-content" id="modalSummary"></div>
                         </div>
                         
                         <div class="log-section">
@@ -789,12 +668,7 @@
                                 <i class="fas fa-tools"></i>
                                 <span>Work Details</span>
                             </div>
-                            <div class="log-section-content" id="modalDetails">
-                                - Replaced legacy firewall with new Cisco ASA 5500-X<br>
-                                - Configured security policies and access rules<br>
-                                - Performed penetration testing using Kali Linux tools<br>
-                                - Verified all security groups and network segmentation
-                            </div>
+                            <div class="log-section-content" id="modalDetails"></div>
                         </div>
                         
                         <div class="log-section">
@@ -802,12 +676,7 @@
                                 <i class="fas fa-exclamation-triangle"></i>
                                 <span>Issues & Solutions</span>
                             </div>
-                            <div class="log-section-content" id="modalIssues">
-                                - Legacy firewall rules were incompatible with new device<br>
-                                &nbsp;&nbsp;→ Created migration script to convert rules<br>
-                                - Some endpoints had outdated security certificates<br>
-                                &nbsp;&nbsp;→ Updated certificates and verified connections
-                            </div>
+                            <div class="log-section-content" id="modalIssues"></div>
                         </div>
                         
                         <div class="log-section">
@@ -815,12 +684,7 @@
                                 <i class="fas fa-box"></i>
                                 <span>Items Used</span>
                             </div>
-                            <div class="log-section-content" id="modalItems">
-                                - Cisco ASA 5500-X Firewall<br>
-                                - Console cables<br>
-                                - Rack mounting kit<br>
-                                - Network testing tools
-                            </div>
+                            <div class="log-section-content" id="modalItems"></div>
                         </div>
                         
                         <div class="log-section">
@@ -828,11 +692,7 @@
                                 <i class="fas fa-lightbulb"></i>
                                 <span>Recommendations</span>
                             </div>
-                            <div class="log-section-content" id="modalRecommendations">
-                                - Schedule quarterly security audits<br>
-                                - Implement multi-factor authentication for admin accounts<br>
-                                - Update employee security training materials
-                            </div>
+                            <div class="log-section-content" id="modalRecommendations"></div>
                         </div>
                         
                         <div class="log-section">
@@ -840,16 +700,7 @@
                                 <i class="fas fa-users"></i>
                                 <span>Technicians</span>
                             </div>
-                            <div id="modalTechnicians">
-                                <span class="technician-tag">
-                                    <i class="fas fa-user"></i>
-                                    <span>Michael Chen</span>
-                                </span>
-                                <span class="technician-tag">
-                                    <i class="fas fa-user"></i>
-                                    <span>James Wilson</span>
-                                </span>
-                            </div>
+                            <div id="modalTechnicians"></div>
                         </div>
                     </div>
                 </div>
@@ -859,8 +710,11 @@
                 <button class="btn btn-outline" id="modalCloseBtn">
                     Close
                 </button>
-                <button class="btn btn-primary" id="modalPdfBtn" data-log-id="2">
+                <button class="btn btn-primary" id="modalPdfBtn">
                     <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <button class="btn btn-danger hidden" id="deleteLogBtn">
+                    <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
         </div>
@@ -879,32 +733,32 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label class="form-label">Client</label>
-                    <input type="text" class="form-input" id="followupClient" value="TechCorp Inc." readonly>
+                    <input type="text" class="form-input" id="followupClient" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Reason for Follow-up</label>
-                    <textarea class="form-input" rows="3" placeholder="Describe the reason for follow-up...">Network outage after maintenance. Need to verify router configurations and replace faulty hardware.</textarea>
+                    <textarea class="form-input" id="followupReason" rows="3" placeholder="Describe the reason for follow-up..."></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Priority</label>
-                    <select class="form-input">
-                        <option>Urgent (24 hours)</option>
-                        <option>High (3 days)</option>
-                        <option>Medium (1 week)</option>
-                        <option>Low (2 weeks)</option>
+                    <select class="form-input" id="followupPriority">
+                        <option value="urgent">Urgent (24 hours)</option>
+                        <option value="high">High (3 days)</option>
+                        <option value="medium">Medium (1 week)</option>
+                        <option value="low">Low (2 weeks)</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Scheduled Date</label>
-                    <input type="date" class="form-input" value="2023-11-20">
+                    <input type="date" class="form-input" id="followupDate">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Assigned Technician</label>
-                    <select class="form-input">
+                    <select class="form-input" id="followupTechnician">
                         <option>Sarah Johnson</option>
                         <option>Michael Chen</option>
                         <option>Robert Garcia</option>
@@ -974,16 +828,16 @@
                     <div class="form-group">
                         <label class="form-label">Status</label>
                         <select class="form-input" id="status">
-                            <option>Completed</option>
-                            <option>In Progress</option>
-                            <option>Pending</option>
-                            <option>Follow-up Required</option>
+                            <option value="completed">Completed</option>
+                            <option value="inprogress">In Progress</option>
+                            <option value="pending">Pending</option>
+                            <option value="followup">Follow-up Required</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Date</label>
-                        <input type="date" class="form-input" id="date" value="2023-11-18">
+                        <input type="date" class="form-input" id="date">
                     </div>
                 </div>
                 
@@ -1021,7 +875,7 @@
     <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
         <div class="flex items-center gap-3">
             <i class="fas fa-check-circle"></i>
-            <span id="toastMessage">Follow-up scheduled successfully!</span>
+            <span id="toastMessage"></span>
         </div>
     </div>
     
@@ -1054,62 +908,274 @@
         
         // Buttons
         const newLogBtn = document.getElementById('newLogBtn');
+        const createFirstLogBtn = document.getElementById('createFirstLogBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
-        const viewLogBtns = document.querySelectorAll('.view-log-btn');
-        const followupBtns = document.querySelectorAll('.followup-btn');
-        const pdfBtns = document.querySelectorAll('.pdf-btn');
         const modalPdfBtn = document.getElementById('modalPdfBtn');
+        const deleteLogBtn = document.getElementById('deleteLogBtn');
         const confirmFollowupBtn = document.getElementById('confirmFollowupBtn');
         const addTechBtn = document.getElementById('addTechBtn');
         const saveLogBtn = document.getElementById('saveLogBtn');
+        const viewAllBtn = document.getElementById('viewAllBtn');
+        
+        // Containers
+        const urgentLogsContainer = document.getElementById('urgentLogsContainer');
+        const recentLogsContainer = document.getElementById('recentLogsContainer');
         const techList = document.getElementById('techList');
+        
+        // Stats elements
+        const totalLogsElement = document.getElementById('totalLogs');
+        const completedLogsElement = document.getElementById('completedLogs');
+        const pendingLogsElement = document.getElementById('pendingLogs');
+        const totalClientsElement = document.getElementById('totalClients');
+        const urgentCountElement = document.getElementById('urgentCount');
         
         // Technician array
         let technicians = [];
         
-        // Sample logs data
-        const logs = [
-            {
-                id: 1,
-                clientName: "TechCorp Inc.",
-                location: "123 Business Park",
-                workSummary: "Network outage after maintenance. Need to verify router configurations and replace faulty hardware.",
-                workDetails: "Checked router configurations and found misconfigurations. Replaced faulty router module.",
-                issues: "Router module was damaged during maintenance.",
-                itemsUsed: "Router module X-200, Cisco console cable, Rack screws",
-                recommendations: "Schedule hardware maintenance checks quarterly.",
-                status: "Follow-up Required",
-                date: "2023-11-15",
-                technicians: ["Sarah Johnson", "Michael Chen"]
-            },
-            {
-                id: 2,
-                clientName: "Global Finance",
-                location: "88 Wall Street",
-                workSummary: "Upgraded firewall and implemented new security policies across all endpoints. Performed penetration testing.",
-                workDetails: "- Replaced legacy firewall with new Cisco ASA 5500-X\n- Configured security policies and access rules\n- Performed penetration testing using Kali Linux tools\n- Verified all security groups and network segmentation",
-                issues: "- Legacy firewall rules were incompatible with new device\n  → Created migration script to convert rules\n- Some endpoints had outdated security certificates\n  → Updated certificates and verified connections",
-                itemsUsed: "Cisco ASA 5500-X Firewall, Console cables, Rack mounting kit, Network testing tools",
-                recommendations: "- Schedule quarterly security audits\n- Implement multi-factor authentication for admin accounts\n- Update employee security training materials",
-                status: "Completed",
-                date: "2023-11-18",
-                technicians: ["Michael Chen", "James Wilson"]
-            },
-            {
-                id: 3,
-                clientName: "MediCare Clinic",
-                location: "456 Health Ave",
-                workSummary: "Server migration to new hardware. Completed data transfer, pending configuration and testing.",
-                workDetails: "- Set up new server hardware\n- Migrated data from old server\n- Configured network settings\n- Tested basic functionality",
-                issues: "- Old server had incompatible RAID configuration\n  → Created custom migration script\n- Network switch needed firmware update",
-                itemsUsed: "Dell PowerEdge R750 Server, Ethernet cables, Rack rails, KVM switch",
-                recommendations: "- Schedule full system test next week\n- Implement backup verification process",
-                status: "In Progress",
-                date: "2023-11-17",
-                technicians: ["Robert Garcia"]
+        // Current log being viewed/edited
+        let currentLogId = null;
+        
+        // Initialize application
+        function initApp() {
+            // Set today's date as default
+            document.getElementById('date').valueAsDate = new Date();
+            
+            // Set follow-up date to tomorrow as default
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('followupDate').valueAsDate = tomorrow;
+            
+            // Load logs from localStorage
+            loadLogs();
+            
+            // Update stats
+            updateStats();
+            
+            // Render logs
+            renderUrgentLogs();
+            renderRecentLogs();
+        }
+        
+        // Load logs from localStorage
+        function loadLogs() {
+            const logsJSON = localStorage.getItem('wiredwise_logs');
+            if (!logsJSON) {
+                return [];
             }
-        ];
+            return JSON.parse(logsJSON);
+        }
+        
+        // Save logs to localStorage
+        function saveLogs(logs) {
+            localStorage.setItem('wiredwise_logs', JSON.stringify(logs));
+        }
+        
+        // Update dashboard statistics
+        function updateStats() {
+            const logs = loadLogs();
+            const clients = new Set();
+            let completed = 0;
+            let pending = 0;
+            let urgent = 0;
+            
+            logs.forEach(log => {
+                clients.add(log.clientName);
+                if (log.status === 'completed') completed++;
+                if (log.status === 'pending' || log.status === 'inprogress') pending++;
+                if (log.status === 'followup') urgent++;
+            });
+            
+            totalLogsElement.textContent = logs.length;
+            completedLogsElement.textContent = completed;
+            pendingLogsElement.textContent = pending;
+            totalClientsElement.textContent = clients.size;
+            urgentCountElement.textContent = `${urgent} urgent`;
+            
+            // Enable/disable view all button
+            viewAllBtn.disabled = logs.length === 0;
+        }
+        
+        // Render urgent logs
+        function renderUrgentLogs() {
+            const logs = loadLogs();
+            const urgentLogs = logs.filter(log => log.status === 'followup');
+            
+            if (urgentLogs.length === 0) {
+                urgentLogsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No urgent follow-ups</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            urgentLogs.forEach(log => {
+                html += createLogHtml(log);
+            });
+            urgentLogsContainer.innerHTML = html;
+            
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-log-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const logId = btn.getAttribute('data-log-id');
+                    openLogDetails(logId);
+                });
+            });
+            
+            document.querySelectorAll('.followup-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const client = btn.getAttribute('data-client');
+                    openFollowupModal(client);
+                });
+            });
+        }
+        
+        // Render recent logs
+        function renderRecentLogs() {
+            const logs = loadLogs();
+            
+            if (logs.length === 0) {
+                recentLogsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>No work logs yet</p>
+                        <button class="btn btn-primary" id="createFirstLogBtn">
+                            <i class="fas fa-plus"></i> Create Your First Log
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to the create button
+                document.getElementById('createFirstLogBtn').addEventListener('click', () => {
+                    openModal(newLogModal);
+                });
+                
+                return;
+            }
+            
+            // Sort logs by date (newest first)
+            const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Get the 5 most recent logs
+            const recentLogs = sortedLogs.slice(0, 5);
+            
+            let html = '';
+            recentLogs.forEach(log => {
+                html += createLogHtml(log);
+            });
+            recentLogsContainer.innerHTML = html;
+            
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-log-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const logId = btn.getAttribute('data-log-id');
+                    openLogDetails(logId);
+                });
+            });
+            
+            document.querySelectorAll('.pdf-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const logId = btn.getAttribute('data-log-id');
+                    const log = loadLogs().find(l => l.id == logId);
+                    if (log) {
+                        generatePDF(log);
+                    }
+                });
+            });
+        }
+        
+        // Create HTML for a log preview
+        function createLogHtml(log) {
+            const statusClass = 
+                log.status === 'completed' ? 'status-completed' :
+                log.status === 'inprogress' ? 'status-inprogress' :
+                log.status === 'pending' ? 'status-pending' : 'status-followup';
+            
+            const statusText = 
+                log.status === 'completed' ? 'Completed' :
+                log.status === 'inprogress' ? 'In Progress' :
+                log.status === 'pending' ? 'Pending' : 'Follow-up';
+            
+            // Format date
+            const logDate = new Date(log.date);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            let dateText = logDate.toLocaleDateString();
+            if (logDate.toDateString() === today.toDateString()) {
+                dateText = 'Today';
+            } else if (logDate.toDateString() === yesterday.toDateString()) {
+                dateText = 'Yesterday';
+            }
+            
+            let techniciansHtml = '';
+            log.technicians.forEach(tech => {
+                techniciansHtml += `
+                    <span class="technician-tag">
+                        <i class="fas fa-user"></i>
+                        <span>${tech}</span>
+                    </span>
+                `;
+            });
+            
+            return `
+                <div class="log-preview">
+                    <div class="log-header">
+                        <div class="client-info">
+                            <h3 class="h4">${log.clientName}</h3>
+                            <p class="small-text">
+                                <i class="fas fa-map-marker-alt"></i> ${log.location}
+                            </p>
+                        </div>
+                        <div class="log-meta">
+                            <p class="small-text">${dateText}</p>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="log-content">
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-tasks"></i>
+                                <span>Work Summary</span>
+                            </div>
+                            <div class="log-section-content">
+                                ${log.workSummary}
+                            </div>
+                        </div>
+                        
+                        <div class="log-section">
+                            <div class="log-section-title">
+                                <i class="fas fa-users"></i>
+                                <span>Technicians</span>
+                            </div>
+                            <div>
+                                ${techniciansHtml}
+                            </div>
+                        </div>
+                        
+                        <div class="log-actions">
+                            <button class="btn btn-outline view-log-btn" data-log-id="${log.id}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            ${log.status === 'followup' ? `
+                                <button class="btn btn-primary followup-btn" data-client="${log.clientName}">
+                                    <i class="fas fa-plus"></i> Follow-up
+                                </button>
+                            ` : `
+                                <button class="btn btn-outline pdf-btn" data-log-id="${log.id}">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
         
         // Modal open/close functions
         function openModal(modal) {
@@ -1138,80 +1204,163 @@
             }, 3000);
         }
         
-        // Generate PDF function
+        // Generate PDF function - UPDATED VERSION
         function generatePDF(log) {
             // Create a new jsPDF instance
             const doc = new jspdf.jsPDF();
             
+            // Set constants for layout
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const contentWidth = pageWidth - 2 * margin;
+            let y = margin;
+            
             // Add header
             doc.setFillColor(241, 100, 17);
-            doc.rect(0, 0, 210, 20, 'F');
+            doc.rect(0, 0, pageWidth, 25, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(18);
-            doc.text('WiredWise Work Log', 105, 12, { align: 'center' });
+            doc.setFont(undefined, 'bold');
+            doc.text('WiredWise Work Log', pageWidth / 2, 15, { align: 'center' });
             
-            // Client info
+            // Reset text color and font for content
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(12);
-            doc.text(`Client: ${log.clientName}`, 20, 30);
-            doc.text(`Location: ${log.location}`, 20, 40);
-            doc.text(`Date: ${log.date}`, 20, 50);
+            doc.setFont(undefined, 'normal');
             
-            // Status
-            doc.setFontSize(14);
-            doc.text('Status:', 140, 30);
-            doc.setFontSize(12);
-            doc.text(log.status, 140, 40);
+            // Client info section
+            y = addSection(doc, 'Client Information', y, margin, pageWidth, pageHeight);
             
-            // Work summary
-            doc.setFontSize(14);
-            doc.text('Work Summary:', 20, 65);
-            doc.setFontSize(12);
-            doc.text(log.workSummary, 20, 75, { maxWidth: 170 });
+            doc.setFont(undefined, 'bold');
+            doc.text('Client:', margin, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(log.clientName, margin + 20, y);
+            y += 7;
             
-            // Work details
-            doc.setFontSize(14);
-            doc.text('Work Details:', 20, 95);
-            doc.setFontSize(12);
-            doc.text(log.workDetails, 20, 105, { maxWidth: 170 });
+            doc.setFont(undefined, 'bold');
+            doc.text('Location:', margin, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(log.location, margin + 25, y);
+            y += 7;
             
-            // Issues & Solutions
-            doc.setFontSize(14);
-            doc.text('Issues & Solutions:', 20, 130);
-            doc.setFontSize(12);
-            doc.text(log.issues, 20, 140, { maxWidth: 170 });
+            doc.setFont(undefined, 'bold');
+            doc.text('Date:', margin, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(log.date, margin + 18, y);
+            y += 7;
             
-            // Items Used
-            doc.setFontSize(14);
-            doc.text('Items Used:', 20, 165);
-            doc.setFontSize(12);
-            doc.text(log.itemsUsed, 20, 175, { maxWidth: 170 });
+            doc.setFont(undefined, 'bold');
+            doc.text('Status:', margin, y);
+            doc.setFont(undefined, 'normal');
             
-            // Recommendations
-            doc.setFontSize(14);
-            doc.text('Recommendations:', 20, 195);
-            doc.setFontSize(12);
-            doc.text(log.recommendations, 20, 205, { maxWidth: 170 });
+            const statusText = 
+                log.status === 'completed' ? 'Completed' :
+                log.status === 'inprogress' ? 'In Progress' :
+                log.status === 'pending' ? 'Pending' : 'Follow-up Required';
+                
+            doc.text(statusText, margin + 22, y);
+            y += 10;
             
-            // Technicians
-            doc.setFontSize(14);
-            doc.text('Technicians:', 20, 230);
-            doc.setFontSize(12);
-            let yPos = 240;
+            // Work Summary section
+            y = addSection(doc, 'Work Summary', y, margin, pageWidth, pageHeight);
+            y = addWrappedText(doc, log.workSummary, margin, y, contentWidth, pageHeight, 7);
+            y += 5;
+            
+            // Work Details section
+            if (log.workDetails) {
+                y = addSection(doc, 'Work Details', y, margin, pageWidth, pageHeight);
+                y = addWrappedText(doc, log.workDetails, margin, y, contentWidth, pageHeight, 7);
+                y += 5;
+            }
+            
+            // Issues & Solutions section
+            if (log.issues) {
+                y = addSection(doc, 'Issues & Solutions', y, margin, pageWidth, pageHeight);
+                y = addWrappedText(doc, log.issues, margin, y, contentWidth, pageHeight, 7);
+                y += 5;
+            }
+            
+            // Items Used section
+            if (log.itemsUsed) {
+                y = addSection(doc, 'Items Used', y, margin, pageWidth, pageHeight);
+                y = addWrappedText(doc, log.itemsUsed, margin, y, contentWidth, pageHeight, 7);
+                y += 5;
+            }
+            
+            // Recommendations section
+            if (log.recommendations) {
+                y = addSection(doc, 'Recommendations', y, margin, pageWidth, pageHeight);
+                y = addWrappedText(doc, log.recommendations, margin, y, contentWidth, pageHeight, 7);
+                y += 5;
+            }
+            
+            // Technicians section - ensure visibility
+            y = addSection(doc, 'Technicians', y, margin, pageWidth, pageHeight);
             log.technicians.forEach(tech => {
-                doc.text(`• ${tech}`, 25, yPos);
-                yPos += 7;
+                // Check if we need a new page
+                if (y > pageHeight - 15) {
+                    doc.addPage();
+                    y = margin;
+                }
+                
+                doc.text('• ' + tech, margin + 5, y);
+                y += 7;
             });
             
             // Footer
             doc.setFontSize(10);
             doc.setTextColor(100);
-            doc.text('Generated by WiredWise Work Logger', 105, 290, { align: 'center' });
+            doc.text('Generated by WiredWise Work Logger', pageWidth / 2, pageHeight - 10, { align: 'center' });
             
             // Save the PDF
             const filename = `${log.clientName.replace(/\s+/g, '_')}_Work_Log.pdf`;
             doc.save(filename);
             showToast(`PDF downloaded: ${filename}`);
+        }
+        
+        // Helper function to add a section header with proper spacing
+        function addSection(doc, title, y, margin, pageWidth, pageHeight) {
+            // Check if we need a new page
+            if (y > pageHeight - 30) {
+                doc.addPage();
+                y = margin;
+            }
+            
+            y += 10; // Add space before section
+            
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(14);
+            doc.text(title, margin, y);
+            y += 7;
+            
+            // Draw a line under the section title
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            // Reset font for content
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            
+            return y;
+        }
+        
+        // Helper function to add wrapped text with proper spacing
+        function addWrappedText(doc, text, margin, y, contentWidth, pageHeight, lineHeight) {
+            const lines = doc.splitTextToSize(text, contentWidth);
+            
+            for (let i = 0; i < lines.length; i++) {
+                // Check if we need a new page
+                if (y > pageHeight - 15) {
+                    doc.addPage();
+                    y = margin;
+                }
+                
+                doc.text(lines[i], margin, y);
+                y += lineHeight;
+            }
+            
+            return y;
         }
         
         // Add technician function
@@ -1288,8 +1437,10 @@
                 technicians: [...technicians]
             };
             
-            // Add to logs array
+            // Get existing logs and add new one
+            const logs = loadLogs();
             logs.push(newLog);
+            saveLogs(logs);
             
             // Show success message
             showToast(`Log created for ${clientName}`);
@@ -1302,31 +1453,54 @@
             document.getElementById('issues').value = '';
             document.getElementById('itemsUsed').value = '';
             document.getElementById('recommendations').value = '';
-            document.getElementById('status').value = 'Completed';
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('status').value = 'completed';
+            document.getElementById('date').valueAsDate = new Date();
             technicians = [];
             renderTechnicians();
+            
+            // Update UI
+            updateStats();
+            renderUrgentLogs();
+            renderRecentLogs();
             
             // Close modal
             closeModal(newLogModal);
         }
         
-        // Set modal content for log details
-        function setLogModalContent(log) {
+        // Open log details
+        function openLogDetails(logId) {
+            const logs = loadLogs();
+            const log = logs.find(l => l.id == logId);
+            
+            if (!log) {
+                showToast('Log not found');
+                return;
+            }
+            
+            currentLogId = logId;
+            
             document.getElementById('modalClientName').textContent = log.clientName;
-            document.getElementById('modalLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${log.location}`;
+            document.getElementById('modalLocationText').textContent = log.location;
             document.getElementById('modalDate').textContent = log.date;
-            document.getElementById('modalStatus').textContent = log.status;
-            document.getElementById('modalStatus').className = `status-badge ${
-                log.status === 'Completed' ? 'status-completed' : 
-                log.status === 'In Progress' ? 'status-inprogress' : 
-                log.status === 'Follow-up Required' ? 'status-followup' : 'status-pending'
-            }`;
+            
+            const statusText = 
+                log.status === 'completed' ? 'Completed' :
+                log.status === 'inprogress' ? 'In Progress' :
+                log.status === 'pending' ? 'Pending' : 'Follow-up Required';
+                
+            const statusClass = 
+                log.status === 'completed' ? 'status-completed' :
+                log.status === 'inprogress' ? 'status-inprogress' :
+                log.status === 'pending' ? 'status-pending' : 'status-followup';
+                
+            document.getElementById('modalStatus').textContent = statusText;
+            document.getElementById('modalStatus').className = `status-badge ${statusClass}`;
+            
             document.getElementById('modalSummary').textContent = log.workSummary;
-            document.getElementById('modalDetails').innerHTML = log.workDetails.replace(/\n/g, '<br>');
-            document.getElementById('modalIssues').innerHTML = log.issues.replace(/\n/g, '<br>');
-            document.getElementById('modalItems').innerHTML = log.itemsUsed.replace(/\n/g, '<br>');
-            document.getElementById('modalRecommendations').innerHTML = log.recommendations.replace(/\n/g, '<br>');
+            document.getElementById('modalDetails').textContent = log.workDetails || 'No details provided';
+            document.getElementById('modalIssues').textContent = log.issues || 'No issues reported';
+            document.getElementById('modalItems').textContent = log.itemsUsed || 'No items listed';
+            document.getElementById('modalRecommendations').textContent = log.recommendations || 'No recommendations';
             
             // Set technicians
             const techContainer = document.getElementById('modalTechnicians');
@@ -1341,12 +1515,99 @@
                 techContainer.appendChild(tag);
             });
             
+            // Show delete button
+            deleteLogBtn.classList.remove('hidden');
+            
             // Set PDF button data
             modalPdfBtn.setAttribute('data-log-id', log.id);
+            
+            // Open modal
+            openModal(logModal);
+        }
+        
+        // Delete log function
+        function deleteLog() {
+            if (!currentLogId) return;
+            
+            if (!confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
+                return;
+            }
+            
+            const logs = loadLogs();
+            const updatedLogs = logs.filter(log => log.id != currentLogId);
+            saveLogs(updatedLogs);
+            
+            showToast('Log deleted successfully');
+            
+            // Update UI
+            updateStats();
+            renderUrgentLogs();
+            renderRecentLogs();
+            
+            // Close modal
+            closeModal(logModal);
+        }
+        
+        // Open follow-up modal
+        function openFollowupModal(client) {
+            document.getElementById('followupClient').value = client;
+            openModal(followupModal);
+        }
+        
+        // Schedule follow-up
+        function scheduleFollowup() {
+            const client = document.getElementById('followupClient').value;
+            const reason = document.getElementById('followupReason').value;
+            const priority = document.getElementById('followupPriority').value;
+            const date = document.getElementById('followupDate').value;
+            const technician = document.getElementById('followupTechnician').value;
+            
+            if (!client || !reason || !date || !technician) {
+                showToast('Please fill in all fields');
+                return;
+            }
+            
+            // Create follow-up log
+            const newLog = {
+                id: Date.now(),
+                clientName: client,
+                location: '', // This would ideally come from the original log
+                workSummary: `Follow-up: ${reason}`,
+                workDetails: `Scheduled follow-up for ${date} with ${technician}. Priority: ${priority}`,
+                issues: '',
+                itemsUsed: '',
+                recommendations: '',
+                status: 'followup',
+                date: new Date().toISOString().split('T')[0], // Today's date
+                technicians: [technician]
+            };
+            
+            // Get existing logs and add new one
+            const logs = loadLogs();
+            logs.push(newLog);
+            saveLogs(logs);
+            
+            // Show success message
+            showToast(`Follow-up scheduled for ${client}`);
+            
+            // Reset form
+            document.getElementById('followupReason').value = '';
+            
+            // Update UI
+            updateStats();
+            renderUrgentLogs();
+            renderRecentLogs();
+            
+            // Close modal
+            closeModal(followupModal);
         }
         
         // Event Listeners
         newLogBtn.addEventListener('click', () => openModal(newLogModal));
+        
+        if (createFirstLogBtn) {
+            createFirstLogBtn.addEventListener('click', () => openModal(newLogModal));
+        }
         
         // Close buttons
         document.querySelectorAll('.close-newlog-btn').forEach(btn => {
@@ -1360,51 +1621,20 @@
         closeModalBtn.addEventListener('click', () => closeModal(logModal));
         modalCloseBtn.addEventListener('click', () => closeModal(logModal));
         
-        // View log buttons
-        viewLogBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const logId = btn.getAttribute('data-log-id');
-                const log = logs.find(l => l.id == logId);
-                if (log) {
-                    setLogModalContent(log);
-                    openModal(logModal);
-                }
-            });
-        });
-        
-        // Follow-up buttons
-        followupBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const client = btn.getAttribute('data-client');
-                document.getElementById('followupClient').value = client;
-                openModal(followupModal);
-            });
-        });
-        
-        // PDF buttons
-        pdfBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const logId = btn.getAttribute('data-log-id');
-                const log = logs.find(l => l.id == logId);
-                if (log) {
-                    generatePDF(log);
-                }
-            });
-        });
-        
+        // PDF button
         modalPdfBtn.addEventListener('click', () => {
-            const logId = modalPdfBtn.getAttribute('data-log-id');
-            const log = logs.find(l => l.id == logId);
+            const logs = loadLogs();
+            const log = logs.find(l => l.id == currentLogId);
             if (log) {
                 generatePDF(log);
             }
         });
         
+        // Delete log button
+        deleteLogBtn.addEventListener('click', deleteLog);
+        
         // Confirm follow-up
-        confirmFollowupBtn.addEventListener('click', () => {
-            closeModal(followupModal);
-            showToast('Follow-up scheduled successfully!');
-        });
+        confirmFollowupBtn.addEventListener('click', scheduleFollowup);
         
         // Add technician
         addTechBtn.addEventListener('click', addTechnician);
@@ -1437,8 +1667,8 @@
             });
         });
         
-        // Initialize technicians list
-        renderTechnicians();
+        // Initialize application
+        initApp();
     </script>
 </body>
 </html>
